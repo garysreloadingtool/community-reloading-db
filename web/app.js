@@ -84,7 +84,7 @@
   function applyCaliber(c) {
     S.caliberName = c.name; S.caselen = c.caselen; S.oal = c.oal || S.oal; S.casevol = c.casevol || c.casevolGrH2O * E.GRH2O_CM3;
     S.groove = c.groove; S.aeff = c.aeff || 0; S.pmax = c.pmax; S.sebert = c.sebert || 0.5; S.ps = c.ps || S.ps || 250;
-    if (!c.barrel) S.barrel = c.caselen < 35 && c.oal < 45 ? 127 : 610;
+    S.barrel = c.barrel || (c.caselen < 35 && c.oal < 45 ? 127 : 610);
   }
   function applyProjectile(p) {
     S.projName = p.name; S.mp = p.mass || p.massGr * E.GR; S.blen = p.len; S.friction = p.friction || 0;
