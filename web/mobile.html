@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#8a4b14">
+<title>Gary's Reloading Tool</title>
+<link rel="stylesheet" href="style.css">
+<style>
+  html, body { height: 100%; }
+  #app { display: grid; height: 100vh; height: 100dvh; grid-template-rows: 40px minmax(0, 1fr) 50px; gap: 6px; padding: 6px 6px calc(6px + env(safe-area-inset-bottom)); }
+  header { display: flex; align-items: center; gap: 6px; }
+  header .brand { font-size: 14px; flex: 1; overflow: hidden; text-overflow: ellipsis; }
+  header button { padding: 6px 8px; }
+  .pane { min-height: 0; display: flex; flex-direction: column; gap: 6px; }
+  .pane[hidden] { display: none; }
+  nav.tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+  nav.tabs button { padding: 4px 2px; font-size: 13px; }
+  .sub { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
+  .sub button { padding: 6px 2px; }
+  .panel { flex: 1; display: flex; flex-direction: column; gap: 5px; }
+  .row { grid-template-columns: 1fr 92px 44px; font-size: 14px; padding: 2px 0; }
+  .row input { padding: 5px 6px; font-size: 16px; }
+  select { padding: 8px 6px; font-size: 15px; }
+  .kv { font-size: 15px; padding: 5px 0; }
+  #summary { font-size: 13px; }
+  #chartp, #vivp { flex: 1; min-height: 0; }
+  #ladp { flex: 0 0 auto; }
+  .lstep { padding: 6px 1px; }
+  .tools { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .tools button { padding: 10px; }
+  body.showadv #s-pow .row:not(.adv) { display: none; }
+  body.showadv #s-pow .row { font-size: 13px; padding: 0; }
+  body.showadv #s-pow .row input { padding: 2px 6px; font-size: 15px; }
+  #calib { padding: 0; }
+  .cbox { max-height: 100%; height: 100%; border-radius: 0; padding: 8px; gap: 5px; }
+  .cbody { grid-template-columns: 1fr; gap: 5px; flex: 1; }
+  .cgrid { grid-template-columns: 1fr 1fr; gap: 2px 6px; }
+  .cf { font-size: 10px; } .cf input, .cf textarea { font-size: 16px; padding: 2px 5px; }
+  .cnotes { display: none; } #cShots { height: 66px; }
+  .cbtns button { padding: 5px 7px; } .cbtns .sp { display: none; }
+  #calib .disclaimer { display: none; }
+  #calib .ctabs { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; }
+  #calib .ctabs button { padding: 6px; }
+  .cbody { overflow: hidden; } #calib [data-cp].off { display: none; }
+  #calib .ccol:not(:has(> :not(.off))) { display: none; }
+  #cShots { height: 150px !important; } .cnotes { display: flex; }
+  .modal .mbox { height: 100%; border-radius: 0; padding: 8px; }
+  #mcomm, #cshare { padding: 0; } #cshare .box { height: 100%; border-radius: 0; display: flex; flex-direction: column; }
+  #shPreview { flex: 1; height: auto; } .mrow button { padding: 6px; }
+  .cbtns button { padding: 5px 6px; font-size: 12.5px; }
+</style>
+</head>
+<body data-minw="320" data-minh="490">
+<div id="app">
+  <header>
+    <div class="brand">Gary's <span>Reloading Tool</span></div>
+    <button id="btnUnits">Imperial</button>
+    <button id="btnHelp" aria-label="Help">?</button>
+  </header>
+
+  <section class="pane" id="t-load" data-pane="main">
+    <div class="sub">
+      <button class="on" data-tab="s-cal" data-group="sub">Caliber</button>
+      <button data-tab="s-bul" data-group="sub">Bullet</button>
+      <button data-tab="s-pow" data-group="sub">Powder</button>
+    </div>
+    <div class="panel pane" id="s-cal" data-pane="sub"><select id="selCaliber"></select><div id="f-caliber"></div></div>
+    <div class="panel pane" id="s-bul" data-pane="sub" hidden><label class="chk"><input type="checkbox" id="projFilter" checked> only bullets matching the groove diameter</label><select id="selProjectile"></select><div id="f-projectile"></div></div>
+    <div class="panel pane small" id="s-pow" data-pane="sub" hidden><select id="selPowder"></select><div id="f-powder"></div></div>
+  </section>
+
+  <section class="pane" id="t-res" data-pane="main" hidden>
+    <div class="panel" style="flex:0 0 auto"><div id="summary"></div></div>
+    <div class="panel"><div id="results"></div></div>
+    <div class="panel" id="ladp"><h2>Ladder · charge / velocity</h2><div id="ladder"></div></div>
+  </section>
+
+  <section class="pane" id="t-chart" data-pane="main" hidden>
+    <div class="panel" id="chartp"><canvas id="chart"></canvas></div>
+    <div class="panel" id="vivp" style="flex:0 0 32%"><canvas id="viv"></canvas></div>
+  </section>
+
+  <section class="pane" id="t-more" data-pane="main" hidden>
+    <div class="panel">
+      <h2>Example loads</h2><select id="selLoad"></select>
+      <h2 style="margin-top:10px">Files</h2>
+      <div class="tools"><button id="btnOpen">Open file…</button><button id="btnSave">Save load</button></div>
+      <h2 style="margin-top:10px">Chronograph</h2>
+      <button id="btnCal">Calibrate powder to measured velocities</button>
+      <h2 style="margin-top:10px">Powder model</h2>
+      <button id="btnAdv">Show powder model parameters</button>
+      <p class="disclaimer" style="margin-top:auto">Estimates from a simplified model. Not load data. Always verify against published manufacturer data.</p>
+      <div class="muted"><a href="mailto:webmaster@garysreloadingtool.com?subject=I%20found%20an%20issue%20on%20the%20website." class="muted">Issues?</a> · <a href="index.html?desktop=1" class="muted">Desktop version</a></div>
+    </div>
+    <input id="file" type="file" multiple accept=".grtload,.caliber,.projectile,.propellant,.xml" hidden>
+  </section>
+
+  <nav class="tabs">
+    <button class="on" data-tab="t-load" data-group="main">Inputs</button>
+    <button data-tab="t-res" data-group="main">Results</button>
+    <button data-tab="t-chart" data-group="main">Chart</button>
+    <button data-tab="t-more" data-group="main">More</button>
+  </nav>
+</div>
+<div id="gate" class="modal" hidden><div class="box">
+  <h3>Screen too small</h3>
+  <p>This version is meant for a window of at least <b id="gateSize"></b>.</p>
+  <p class="muted">Enlarge the window, rotate your device, or zoom out.</p>
+  <button id="gateTry">Try anyway</button>
+</div></div>
+
+<div id="help" class="modal" hidden><div class="box">
+  <h3>About Gary's Reloading Tool</h3>
+  <p>An interior-ballistics estimator that runs entirely in your browser. Nothing is uploaded; save this page (or the whole folder) and it works offline.</p>
+  <ul>
+    <li>Pick an example load, or a caliber, bullet and powder. Every value can be edited.</li>
+    <li><b>Open</b> reads <code>.grtload</code>, <code>.caliber</code>, <code>.projectile</code> and <code>.propellant</code> files (you can also drag and drop them). <b>Save</b> downloads the current load.</li>
+    <li>Ladder: set the steps (2–10) and step size to compare reduced charges. Click a step to highlight it.</li>
+    <li>Built-in data comes from the community GRT database collection (github.com/zen/grt_databases, CC0).</li>
+  </ul>
+  <p><b>Safety:</b> results come from a simplified model and can be wrong by a wide margin. Never use them as load data. Always start from published manufacturer data, measure your own case volume and bullet length, and work up carefully.</p>
+  <button data-close>Close</button>
+</div></div>
+
+<div id="calib" class="modal" hidden><div class="box cbox">
+  <div class="chead"><h3>Calibration library</h3><select id="cList" aria-label="Saved calibrations"></select><button id="cNew">New</button><button data-close aria-label="Close">✕</button></div>
+  <div class="ctabs"><button class="on" data-ctab="0">Firearm</button><button data-ctab="1">Setup</button><button data-ctab="2">Shots &amp; fit</button></div>
+  <div class="cbody">
+    <div class="ccol">
+      <div class="cload muted" data-cp="0">Load: <span id="cLoad"></span></div>
+      <div id="cFieldsT" class="cgrid" data-cp="0"></div>
+      <div id="cFieldsN" class="cgrid" data-cp="1"></div>
+      <label class="cf cnotes" data-cp="1"><span>Notes</span><textarea id="c-notes" rows="2" placeholder="scope, suppressor, cleaning, conditions…"></textarea></label>
+    </div>
+    <div class="ccol" data-cp="2">
+      <label class="cf"><span>Shots: one charge per line, then each velocity (<i id="cShotsUnit"></i>)</span>
+        <textarea id="cShots" rows="5" placeholder="38.0: 2771 2790 2782 2789&#10;41.0: 2974 2973 2982 2978 2980"></textarea></label>
+      <div id="cOut"></div>
+    </div>
+  </div>
+  <div class="cbtns"><button id="cFit" class="on">Fit powder</button><button id="cSave">Save</button><button id="cApply">Apply to load</button>
+    <span class="sp"></span><button id="cImport">Import…</button><button id="cExport">Export all</button><button id="cDel">Delete</button><button id="cShare">Share…</button><button id="cCommunity">Community…</button>
+    <input id="cFile" type="file" accept=".json,application/json" hidden></div>
+  <div class="disclaimer">Saved in this browser only. Use Export to back up or move to another device.</div>
+</div></div>
+<div id="mcomm" class="modal" hidden><div class="box mbox">
+  <div class="chead"><h3>Community calibrations</h3><span class="sp" style="flex:1"></span><button id="mRefresh">Refresh</button><button data-close aria-label="Close">✕</button></div>
+  <div class="mfilter"><input id="mSearch" type="search" placeholder="Search firearm, caliber, bullet, powder…"><label class="chk"><input type="checkbox" id="mMatch" checked> match current load</label></div>
+  <div id="mList"></div>
+  <div class="mfoot"><span id="mStatus" class="muted"></span><span class="sp"></span><button id="mPrev">‹</button><span id="mPage"></span><button id="mNext">›</button></div>
+  <div class="disclaimer">Shared by other users and only checked for format. Their rifles are not yours: start low and verify with your own chronograph.</div>
+</div></div>
+<div id="cshare" class="modal" hidden><div class="box">
+  <h3>Share with the community</h3>
+  <p class="muted">Opens a GitHub issue (free account needed) with the data below. A maintainer reviews it before it's published. Your serial number and location are never shared.</p>
+  <div class="mfilter"><input id="shHandle" type="text" placeholder="Name to credit (optional)"><label class="chk"><input type="checkbox" id="shNotes"> include notes</label></div>
+  <pre id="shPreview"></pre>
+  <div class="cbtns"><button id="shSubmit" class="on">Open GitHub issue</button><button id="shDownload">Download</button><span class="sp"></span><button data-close>Cancel</button></div>
+</div></div>
+<div id="toast" class="toast"></div>
+<script src="config.js"></script>
+<script src="data.js"></script>
+<script src="engine.js"></script>
+<script src="app.js"></script>
+<script src="calib.js"></script>
+<script src="community.js"></script>
+</body>
+</html>

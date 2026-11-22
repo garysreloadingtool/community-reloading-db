@@ -1,0 +1,48 @@
+# Turns a "calibration" issue into a pull request that adds it to community/calibrations.json.
+# A maintainer reviews and merges the PR; nothing is published automatically.
+name: Calibration submission
+on:
+  issues:
+    types: [opened, edited, labeled]
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+jobs:
+  submit:
+    if: contains(github.event.issue.labels.*.name, 'calibration')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - name: Validate and merge into database
+        id: validate
+        env:
+          ISSUE_BODY: ${{ github.event.issue.body }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          set -o pipefail
+          node tools/validate_community.js community/calibrations.json 2>&1 | tee result.txt
+      - name: Open pull request
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          N: ${{ github.event.issue.number }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          BR="calibration/issue-$N"
+          git checkout -B "$BR"
+          git add community/calibrations.json
+          git commit -m "Add community calibration from issue #$N"
+          git push -f origin "$BR"
+          gh pr view "$BR" >/dev/null 2>&1 || gh pr create --head "$BR" --title "Calibration from issue #$N" --body "Closes #$N. Validated automatically; please review before merging."
+          gh issue comment "$N" --body "Thanks! The data passed validation and is waiting for review: $(gh pr view "$BR" --json url -q .url)"
+      - name: Report problems
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          N: ${{ github.event.issue.number }}
+        run: gh issue comment "$N" --body "The submission could not be validated. Please edit the issue to fix it.
+          $(sed 's/^/    /' result.txt 2>/dev/null | head -20)"
