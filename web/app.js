@@ -308,6 +308,10 @@
     syncSelects();
   }
   function syncSelects() {
+    var ls = $('selLoad'), x = ls.querySelector('option[data-cur]'); if (x) x.remove();
+    var li = S.title ? lists.loads.findIndex(function (l) { return l.name === S.title; }) : -1;
+    if (li < 0 && S.title) { x = document.createElement('option'); x.value = 'cur'; x.dataset.cur = 1; x.textContent = S.title; ls.appendChild(x); }
+    ls.value = li >= 0 ? li : S.title ? 'cur' : '';
     [['selCaliber', 'calibers', 'caliberName'], ['selProjectile', 'projectiles', 'projName'], ['selPowder', 'powders', 'powderName']].forEach(function (a) {
       var i = lists[a[1]].findIndex(function (x) { return x.name === S[a[2]]; }); $(a[0]).value = i >= 0 ? i : '';
     });
@@ -331,10 +335,10 @@
     if (saved && saved.casevol) S = saved; else applyLoad(DB.loads[1] || DB.loads[0]);
     if (S.laddercnt == null) S.laddercnt = 1;
     populate();
-    $('selLoad').onchange = function (e) { if (e.target.value !== '') { applyLoad(lists.loads[e.target.value]); populate(); compute(); e.target.value = ''; } };
+    $('selLoad').onchange = function (e) { if (e.target.value !== '' && e.target.value !== 'cur') { applyLoad(lists.loads[e.target.value]); populate(); compute(); } };
     $('selCaliber').onchange = function (e) { if (e.target.value !== '') { applyCaliber(lists.calibers[e.target.value]); S.title = ''; populate(); compute(); } };
-    $('selProjectile').onchange = function (e) { if (e.target.value !== '') { applyProjectile(lists.projectiles[e.target.value]); S.title = ''; compute(); } };
-    $('selPowder').onchange = function (e) { if (e.target.value !== '') { applyPowder(lists.powders[e.target.value]); S.title = ''; compute(); } };
+    $('selProjectile').onchange = function (e) { if (e.target.value !== '') { applyProjectile(lists.projectiles[e.target.value]); S.title = ''; syncSelects(); compute(); } };
+    $('selPowder').onchange = function (e) { if (e.target.value !== '') { applyPowder(lists.powders[e.target.value]); S.title = ''; syncSelects(); compute(); } };
     if ($('projFilter')) $('projFilter').onchange = populate;
     $('btnUnits').onclick = function () { imperial = !imperial; store.set('imperial', imperial); $('btnUnits').textContent = imperial ? 'Imperial' : 'Metric'; buildFields(); render(); };
     $('btnUnits').textContent = imperial ? 'Imperial' : 'Metric';
