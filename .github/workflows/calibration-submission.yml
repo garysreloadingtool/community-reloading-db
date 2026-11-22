@@ -37,6 +37,9 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
           BR="calibration/issue-$N"
+          if git fetch -q origin "$BR" 2>/dev/null && git diff --quiet FETCH_HEAD -- community/calibrations.json; then
+            echo "Same data as the existing pull request; nothing to do."; exit 0
+          fi
           git checkout -B "$BR"
           git add community/calibrations.json
           git commit -m "Add community calibration from issue #$N"
