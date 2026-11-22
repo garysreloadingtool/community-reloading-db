@@ -8,9 +8,13 @@ permissions:
   contents: write
   pull-requests: write
   issues: write
+# One run at a time per issue: a new issue with the label fires both "opened" and "labeled".
+concurrency:
+  group: calibration-issue-${{ github.event.issue.number }}
+  cancel-in-progress: false
 jobs:
   submit:
-    if: contains(github.event.issue.labels.*.name, 'calibration')
+    if: contains(github.event.issue.labels.*.name, 'calibration') && (github.event.action != 'labeled' || github.event.label.name == 'calibration')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -37,10 +41,14 @@ jobs:
           git add community/calibrations.json
           git commit -m "Add community calibration from issue #$N"
           git push -f origin "$BR"
-          gh pr view "$BR" >/dev/null 2>&1 || gh pr create --head "$BR" --title "Calibration from issue #$N" --body "Closes #$N. Validated automatically; please review before merging."
-          gh issue comment "$N" --body "Thanks! The data passed validation and is waiting for review: $(gh pr view "$BR" --json url -q .url)"
+          if gh pr view "$BR" --json state -q .state 2>/dev/null | grep -q OPEN; then
+            gh issue comment "$N" --body "Updated: the edited data passed validation. The pull request now has the new version: $(gh pr view "$BR" --json url -q .url)"
+          else
+            gh pr create --head "$BR" --title "Calibration from issue #$N" --body "Closes #$N. Validated automatically; please review before merging."
+            gh issue comment "$N" --body "Thanks! The data passed validation and is waiting for review: $(gh pr view "$BR" --json url -q .url)"
+          fi
       - name: Report problems
-        if: failure()
+        if: failure() && steps.validate.outcome == 'failure'
         env:
           GH_TOKEN: ${{ github.token }}
           N: ${{ github.event.issue.number }}
