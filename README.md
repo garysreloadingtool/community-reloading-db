@@ -14,11 +14,18 @@ The ballistics model in `web/engine.js` is an independent, simplified lumped-par
 Results are estimates only, so never use them as load data.
 
 ## Model accuracy
-- `K.ba` and `K.heat` in `web/engine.js` are fitted by `node tools/fit_model.js` to measured chronograph data
-  (6.5 Creedmoor, 120gr Sierra MK, N540, 24": 38.0gr → 848 m/s, 41.0gr → 908 m/s). The model matches both within 0.4 %.
-- Other powders, especially fast pistol powders, can be off by 10–15 %. Use **Calibrate**: enter your measured
-  charge/velocity pairs and the powder's Ba is scaled to fit. `<Measurement>` blocks in `.grtload` files are imported
-  and saved with the load.
+- The engine integrates burn, gas pressure and bullet motion with an adaptive second-order step, includes heat loss to
+  the chamber and bore walls (`K.hw`), and refuses loads whose charge cannot fit in the case instead of showing
+  meaningless numbers.
+- **Fitted powders** (marked "(fitted)", 92 rifle powders) have burn parameters fitted to roughly 100,000 published
+  manufacturer load points. On held-out loads (cartridges and bullets not used in the fit) the median muzzle-velocity
+  error is about 3 % (90 % of loads within about 8 %). Each fitted powder shares one burn-shape template, so pressure
+  is only a rough estimate (median error about 20–25 %). **Never exceed published maximum loads.**
+- **Typical cartridges** (marked "(typical)", 47 common rifle cartridges) use typical case capacities; real brass
+  varies by about 2 %. Measure your own case capacity for best results.
+- Only the fitted parameters are included here, not the published load data they were fitted to.
+- For any powder, use **Calibrate**: enter your measured charge/velocity pairs and the powder's Ba is scaled to fit.
+  `<Measurement>` blocks in `.grtload` files are imported and saved with the load.
 
 ## Calibration library
 **Calibrate** opens a library of the user's own chronograph data. Each record stores:

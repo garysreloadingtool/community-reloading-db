@@ -91,7 +91,7 @@
   }
   function applyPowder(p) {
     S.baCal = 1; S.measured = []; S.calName = '';
-    S.powderName = p.name; ['Ba','a0','z1','z2','Qex','k','pc','pcd','eta','tcc','tch'].forEach(function (k) { S[k] = p[k] || 0; });
+    S.powderName = p.name; S.powderFit = p.fit || null; ['Ba','a0','z1','z2','Qex','k','pc','pcd','eta','tcc','tch'].forEach(function (k) { S[k] = p[k] || 0; });
     if (!S.eta) S.eta = 1;
   }
   function applyLoad(L) {
@@ -127,6 +127,8 @@
       '<div>' + esc(S.projName || 'Custom bullet') + '</div>' +
       '<div>' + esc(S.powderName || 'Custom powder') + ' · ' + fmt(toDisp(r.mc, 'mass'), 'mass') + ' ' + unitLabel('mass') + '</div>' +
       '<div class="muted">Seating depth ' + fmt(toDisp(r.seat, 'len'), 'len') + ' ' + unitLabel('len') + ' · free volume ' + fmt(toDisp(r.freeVol, 'vol'), 'vol') + ' ' + unitLabel('vol') + '</div>' +
+      (S.powderFit ? '<div class="muted">Fitted powder: velocity typically within ±' + (S.powderFit.velErrMedian * 100).toFixed(1) +
+        ' % of published data; pressure is a rough estimate (±25 %). Never exceed published maximum loads.</div>' : '') +
       (S.baCal && S.baCal !== 1 ? '<div class="muted">Chrono-calibrated' + (S.calName ? ' (' + esc(S.calName) + ')' : '') + ': Ba ×' + S.baCal.toFixed(3) + '</div>' : ''));
     var kv = [
       ['Max. pressure', fmt(toDisp(r.pmax, 'pres'), 'pres') + ' ' + unitLabel('pres'), r.overPmax ? 'bad' : 'p'],
@@ -138,14 +140,16 @@
       ['Burnt powder', (r.z * 100).toFixed(1) + ' %', ''],
       ['Efficiency', r.eff.toFixed(1) + ' %', ''],
       ['IPSC factor', r.ipsc.toFixed(1), '']];
+    if (r.invalid) kv.forEach(function (k) { if (k[0] !== 'Fill ratio') { k[1] = '—'; k[2] = ''; } });
     var res = $('results');
     if (res) res.innerHTML = GRTHTML(kv.map(function (k) { return '<div class="kv ' + k[2] + '"><span>' + k[0] + '</span><b>' + k[1] + '</b></div>'; }).join('') +
+      (r.invalid ? '<div class="warn">⚠ ' + esc(r.invalid) + '</div>' : '') +
       (r.overPmax ? '<div class="warn">⚠ Exceeds the caliber\'s maximum pressure</div>' : ''));
     var lad = $('ladder');
     if (lad) lad.innerHTML = GRTHTML(results.length < 2 ? '<span class="muted">Ladder off (steps = 1)</span>' :
       results.map(function (q, i) {
         return '<button class="lstep' + (i === focus ? ' on' : '') + (q.overPmax ? ' over' : '') + '" data-i="' + i + '">' +
-          fmt(toDisp(q.mc, 'mass'), 'mass') + '<small>' + (imperial ? (q.v * 3.28084).toFixed(0) : q.v.toFixed(0)) + '</small></button>';
+          fmt(toDisp(q.mc, 'mass'), 'mass') + '<small>' + (q.invalid ? '—' : imperial ? (q.v * 3.28084).toFixed(0) : q.v.toFixed(0)) + '</small></button>';
       }).join(''));
     drawMain(); drawViv();
   }
@@ -162,7 +166,8 @@
     var cv = $('chart'); if (!cv || !results.length) return; var g = setupCanvas(cv); if (!g) return;
     var c = g.c, L = 52, R = 52, T = 14, B = 26, W = g.w - L - R, H = g.h - T - B;
     var xmax = results[0].travel, pmax = 0, vmax = 0;
-    results.forEach(function (r) { pmax = Math.max(pmax, r.pmax); vmax = Math.max(vmax, r.v); });
+    results.forEach(function (r) { if (!r.invalid) { pmax = Math.max(pmax, r.pmax); vmax = Math.max(vmax, r.v); } });
+    if (!pmax) pmax = S.pmax || 4000; if (!vmax) vmax = 1000;
     if (S.pmax) pmax = Math.max(pmax, S.pmax); pmax *= 1.1; vmax *= 1.1;
     var X = function (x) { return L + x / xmax * W; }, YP = function (p) { return T + H - p / pmax * H; }, YV = function (v) { return T + H - v / vmax * H; };
     c.strokeStyle = css('--grid'); c.fillStyle = css('--muted'); c.lineWidth = 1;
@@ -186,7 +191,7 @@
     });
     c.globalAlpha = 1;
     var r = results[focus];
-    if (hoverX != null && hoverX >= L && hoverX <= L + W) {
+    if (hoverX != null && hoverX >= L && hoverX <= L + W && r.curve.length) {
       var xm = (hoverX - L) / W * xmax, pt = r.curve.reduce(function (a, b) { return Math.abs(b[0] - xm) < Math.abs(a[0] - xm) ? b : a; });
       c.strokeStyle = css('--muted'); c.beginPath(); c.moveTo(hoverX, T); c.lineTo(hoverX, T + H); c.stroke();
       var txt = fmt(toDisp(pt[0] * 1000, 'len'), 'len') + ' ' + unitLabel('len') + ' · ' + fmt(toDisp(pt[1] / 1e5, 'pres'), 'pres') + ' ' + unitLabel('pres') +
