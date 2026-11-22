@@ -2,8 +2,10 @@
 
 Offline, in-browser interior-ballistics estimator.
 
+**Try it online at https://garysreloadingtool.com** (no install needed; works on phones too).
+
 - Open `web/index.html` directly (double-click works; no server needed). Phones/tablets are sent to `web/mobile.html` automatically; `index.html?desktop=1` forces desktop.
-- To use offline elsewhere, copy the whole `web/` folder (5 files + `mobile.html`).
+- To use offline elsewhere, copy the whole `web/` folder.
 - Min. sizes: desktop 940×610, mobile 320×490 (otherwise a "Try anyway" notice appears).
 - Rebuild the bundled data from github.com/zen/grt_databases (CC0):
   `git clone https://github.com/zen/grt_databases /tmp/grtdb && python3 -I tools/build_data.py /tmp/grtdb web/data.js`

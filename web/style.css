@@ -95,3 +95,4 @@ body.gated #app { visibility: hidden; }
 
 /* share item dialog */
 .ikinds button { flex: 1; }
+#f-caliber, #f-projectile { min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding-right: 2px; }
