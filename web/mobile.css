@@ -44,3 +44,4 @@
   .cbtns button { padding: 5px 6px; font-size: 12.5px; }
   .panel.fixed { flex: 0 0 auto; }
   #vivp { flex: 0 0 32%; }
+  #t-more > .panel { overflow-y: auto; overscroll-behavior: contain; }
