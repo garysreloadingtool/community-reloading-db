@@ -44,12 +44,12 @@
 
   // ---------- form <-> record ----------
   function buildForm() {
-    $('cFieldsT').innerHTML = TEXT.map(function (f) {
+    $('cFieldsT').innerHTML = GRTHTML(TEXT.map(function (f) {
       return '<label class="cf"><span>' + f[1] + '</span><input id="c-' + f[0] + '" type="' + (f[0] === 'date' ? 'date' : 'text') + '" placeholder="' + A.esc(f[2]) + '"></label>';
-    }).join('');
-    $('cFieldsN').innerHTML = NUM.map(function (f) {
+    }).join(''));
+    $('cFieldsN').innerHTML = GRTHTML(NUM.map(function (f) {
       return '<label class="cf"><span>' + f[1] + ' <i>' + A.unitLabel(f[2]) + '</i></span><input id="c-' + f[0] + '" type="number" step="any"></label>';
-    }).join('');
+    }).join(''));
     $('cShotsUnit').textContent = A.unitLabel('mass') + ': ' + (A.imperial() ? 'fps' : 'm/s');
   }
   function show(r) {
@@ -77,18 +77,18 @@
   }
   function report() {
     var r = cur, o = overrides(r);
-    if (!r.shots.length) { $('cOut').innerHTML = '<span class="muted">No shots yet. One line per charge: charge, then each velocity.</span>'; return; }
-    $('cOut').innerHTML = '<table><tr><th>Charge</th><th>n</th><th>Avg</th><th>SD</th><th>ES</th><th>Model</th><th>Δ</th></tr>' + r.shots.map(function (s) {
+    if (!r.shots.length) { $('cOut').innerHTML = GRTHTML('<span class="muted">No shots yet. One line per charge: charge, then each velocity.</span>'); return; }
+    $('cOut').innerHTML = GRTHTML('<table><tr><th>Charge</th><th>n</th><th>Avg</th><th>SD</th><th>ES</th><th>Model</th><th>Δ</th></tr>' + r.shots.map(function (s) {
       var st = stats(s.v), m = A.simAt(s.mc, r.baCal || 1, o).v;
       return '<tr><td>' + A.fmt(A.toDisp(s.mc, 'mass'), 'mass') + '</td><td>' + st.n + '</td><td>' + A.velDisp(st.avg).toFixed(0) + '</td><td>' + A.velDisp(st.sd).toFixed(1) +
         '</td><td>' + A.velDisp(st.es).toFixed(0) + '</td><td>' + A.velDisp(m).toFixed(0) + '</td><td>' + ((m / st.avg - 1) * 100).toFixed(1) + ' %</td></tr>';
-    }).join('') + '</table><div>Powder factor: <b>Ba ×' + (r.baCal || 1).toFixed(3) + '</b>' + (r.baCal === 1 ? ' <span class="muted">(not fitted)</span>' : '') + '</div>';
+    }).join('') + '</table><div>Powder factor: <b>Ba ×' + (r.baCal || 1).toFixed(3) + '</b>' + (r.baCal === 1 ? ' <span class="muted">(not fitted)</span>' : '') + '</div>');
   }
   function list() {
     var sel = $('cList');
-    sel.innerHTML = '<option value="">Saved calibrations (' + recs.length + ')…</option>' + recs.map(function (r) {
+    sel.innerHTML = GRTHTML('<option value="">Saved calibrations (' + recs.length + ')…</option>' + recs.map(function (r) {
       return '<option value="' + r.id + '"' + (cur && r.id === cur.id ? ' selected' : '') + '>' + A.esc(r.name) + '</option>';
-    }).join('');
+    }).join(''));
   }
 
   // ---------- actions ----------

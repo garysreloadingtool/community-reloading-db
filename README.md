@@ -40,3 +40,9 @@ Fitting uses the record's own barrel length, temperature and measurements, not w
 - **Privacy:** serial number and location are never shared, and notes only when the user ticks "include notes".
 - **Shared calibers, bullets, powders and loads:** **Share** on the main screen (More tab on mobile) sends the current item the same way, via `tools/validate_items.js`, into `community/items.json`. Merged items appear in the dropdowns marked ☁ and are cached for offline use.
 - **Setup:** push this project to a GitHub repository, then set the URLs in `web/config.js` (see `community/README.md`).
+
+## Security
+- **Trusted Types:** all HTML the app writes goes through `GRTHTML` in `web/tt.js`, which also refuses script-capable markup. Under a CSP with `require-trusted-types-for 'script'` the browser blocks any other way of writing HTML into the page.
+- **No inline styles or scripts** in the app's own code, so a strict `style-src 'self'` CSP works.
+- **Community data** is validated by the GitHub workflow, reviewed before merging, and escaped before display.
+- **Certificate monitor:** `.github/workflows/certificate-check.yml` checks the live site's certificates daily and fails (GitHub emails the owner) when one expires within 21 days.

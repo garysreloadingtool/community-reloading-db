@@ -62,7 +62,7 @@
     var list = filtered(), n = perPage(), pages = Math.max(1, Math.ceil(list.length / n));
     if (page >= pages) page = pages - 1;
     var rows = list.slice(page * n, page * n + n);
-    box.innerHTML = rows.length ? rows.map(function (r) {
+    box.innerHTML = GRTHTML(rows.length ? rows.map(function (r) {
       var shots = r.shots.reduce(function (a, s) { return a + s.v.length; }, 0);
       var v = r.shots.map(function (s) { return A.fmt(A.toDisp(s.mc, 'mass'), 'mass') + '→' + A.velDisp(C().stats(s.v).avg).toFixed(0); }).join(', ');
       return '<div class="mrow"><div class="mtxt"><b>' + A.esc([r.make, r.model].filter(Boolean).join(' ') || 'Unknown firearm') + '</b> · ' +
@@ -70,7 +70,7 @@
         '<div class="muted">' + [r.load.projName, (r.load.powderName || '') + (r.powderLot ? ' lot ' + r.powderLot : '')].filter(Boolean).map(A.esc).join(' · ') +
         ' · ' + shots + ' shots: ' + v + ' · Ba ×' + (+r.baCal || 1).toFixed(3) + (r.submittedBy ? ' · by ' + A.esc(r.submittedBy) : '') + '</div></div>' +
         '<button data-mapply="' + A.esc(r.id) + '">Apply</button><button data-msave="' + A.esc(r.id) + '">Save</button></div>';
-    }).join('') : '<div class="muted" style="padding:8px">' + (all.length ? 'No matches. Untick "match current load" or change the search.' : 'Nothing to show.') + '</div>';
+    }).join('') : '<div class="muted pad8">' + (all.length ? 'No matches. Untick "match current load" or change the search.' : 'Nothing to show.') + '</div>');
     $('mPage').textContent = (page + 1) + ' / ' + pages;
     $('mPrev').disabled = page === 0; $('mNext').disabled = page >= pages - 1;
   }

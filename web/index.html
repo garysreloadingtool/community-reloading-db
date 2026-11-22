@@ -14,35 +14,7 @@
   })();
 </script>
 <link rel="stylesheet" href="style.css">
-<style>
-  #app { display: grid; height: 100vh; grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); gap: 8px; padding: 8px; }
-  #main { grid-column: 1; grid-row: 1; display: grid; grid-template-rows: 36px minmax(0, 1fr) 22px; gap: 8px; min-height: 0; }
-  header { display: flex; align-items: center; gap: 8px; }
-  header select { width: 220px; }
-  header button { white-space: nowrap; }
-  header .sp { flex: 1; }
-  #body { display: grid; grid-template-columns: 370px minmax(0, 1fr); gap: 8px; min-height: 0; }
-  #left { display: flex; flex-direction: column; gap: 8px; min-height: 0; }
-  #left .panel { display: flex; flex-direction: column; gap: 4px; }
-  #left .panel { flex: 0 1 auto; min-height: 120px; }
-  #left .panel:nth-child(2) { flex-shrink: 0; }
-  #left .panel.pw { flex: 1 1 0; min-height: 190px; }
-
-  .ph { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
-  .ph h2 { margin: 0; }
-  #right { display: grid; grid-template-rows: auto 54px minmax(0, 1fr); gap: 8px; min-height: 0; }
-  #top { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 8px; }
-  #res { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 2px 18px; margin-top: 6px; }
-  #res .kv:nth-last-child(1) { grid-column: span 2; }
-  #vivp { display: flex; flex-direction: column; }
-  #vivp canvas { flex: 1; min-height: 120px; }
-  #ladp { display: flex; align-items: center; gap: 8px; padding: 6px 10px; }
-  #ladp h2 { margin: 0; white-space: nowrap; }
-  #ladder { flex: 1; }
-  #chartp { position: relative; }
-  footer { display: flex; justify-content: space-between; gap: 12px; align-items: center; }
-  footer a { color: var(--muted); }
-</style>
+<link rel="stylesheet" href="desktop.css">
 </head>
 <body data-minw="940" data-minh="610">
 <div id="app">
@@ -68,10 +40,10 @@
       </div>
       <div id="right">
         <div id="top">
-          <div class="panel"><h2>Result</h2><div id="summary"></div><div id="res"><div id="results" style="display:contents"></div></div></div>
+          <div class="panel"><h2>Result</h2><div id="summary"></div><div id="res"><div id="results"></div></div></div>
           <div class="panel" id="vivp"><h2>Powder vivacity (3 phases)</h2><canvas id="viv"></canvas></div>
         </div>
-        <div class="panel" id="ladp"><h2>Ladder <span class="muted" style="text-transform:none">charge / velocity</span></h2><div id="ladder"></div></div>
+        <div class="panel" id="ladp"><h2>Ladder <span class="muted nocase">charge / velocity</span></h2><div id="ladder"></div></div>
         <div class="panel" id="chartp"><canvas id="chart"></canvas></div>
       </div>
     </div>
@@ -120,7 +92,7 @@
   <div class="disclaimer">Saved in this browser only. Use Export to back up or move to another device.</div>
 </div></div>
 <div id="mcomm" class="modal" hidden><div class="box mbox">
-  <div class="chead"><h3>Community calibrations</h3><span class="sp" style="flex:1"></span><button id="mRefresh">Refresh</button><button data-close aria-label="Close">✕</button></div>
+  <div class="chead"><h3>Community calibrations</h3><span class="sp flex1"></span><button id="mRefresh">Refresh</button><button data-close aria-label="Close">✕</button></div>
   <div class="mfilter"><input id="mSearch" type="search" placeholder="Search firearm, caliber, bullet, powder…"><label class="chk"><input type="checkbox" id="mMatch" checked> match current load</label></div>
   <div id="mList"></div>
   <div class="mfoot"><span id="mStatus" class="muted"></span><span class="sp"></span><button id="mPrev">‹</button><span id="mPage"></span><button id="mNext">›</button></div>
@@ -137,12 +109,13 @@
   <h3>Share with the community</h3>
   <p class="muted">Shares the current item with everyone using the site. It opens a GitHub issue (free account needed), and a maintainer reviews it before it appears in the lists (marked ☁).</p>
   <div class="cbtns ikinds"><button data-ikind="load">Whole load</button><button data-ikind="caliber">Caliber</button><button data-ikind="projectile">Bullet</button><button data-ikind="powder">Powder</button></div>
-  <div class="mfilter" style="margin-top:8px"><input id="isName" type="text" maxlength="120" placeholder="Name"></div>
-  <div class="mfilter" style="margin-top:6px"><input id="isHandle" type="text" maxlength="40" placeholder="Name to credit (optional)"><input id="isNotes" type="text" maxlength="500" placeholder="Notes, e.g. source of the data (optional)"></div>
+  <div class="mfilter mt8"><input id="isName" type="text" maxlength="120" placeholder="Name"></div>
+  <div class="mfilter mt6"><input id="isHandle" type="text" maxlength="40" placeholder="Name to credit (optional)"><input id="isNotes" type="text" maxlength="500" placeholder="Notes, e.g. source of the data (optional)"></div>
   <pre id="isPreview"></pre>
   <div class="cbtns"><button id="isSubmit" class="on">Open GitHub issue</button><button id="isDownload">Download</button><span class="sp"></span><button data-close>Cancel</button></div>
 </div></div>
 <div id="toast" class="toast"></div>
+<script src="tt.js"></script>
 <script src="config.js"></script>
 <script src="data.js"></script>
 <script src="engine.js"></script>

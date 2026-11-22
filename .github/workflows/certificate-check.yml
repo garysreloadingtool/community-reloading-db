@@ -1,0 +1,27 @@
+# Daily check of the live site's HTTPS certificates. Let's Encrypt no longer emails expiry warnings, so this run
+# fails when a certificate expires within 21 days (renewal should happen ~30 days before) or the site is
+# unreachable; GitHub then emails the repository owner about the failed scheduled run.
+name: Certificate check
+on:
+  schedule:
+    - cron: '17 6 * * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check certificate expiry
+        run: |
+          fail=0
+          for host in garysreloadingtool.com www.garysreloadingtool.com; do
+            end=$(echo | timeout 20 openssl s_client -connect "$host:443" -servername "$host" 2>/dev/null | openssl x509 -noout -enddate 2>/dev/null | cut -d= -f2)
+            if [ -z "$end" ]; then echo "::error::$host: could not read the certificate"; fail=1; continue; fi
+            days=$(( ($(date -d "$end" +%s) - $(date +%s)) / 86400 ))
+            echo "$host: certificate valid until $end ($days days)"
+            if [ "$days" -lt 21 ]; then echo "::error::$host: certificate expires in $days days"; fail=1; fi
+            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 "https://$host/")
+            if [ "$code" != 200 ]; then echo "::error::$host: HTTPS returned $code"; fail=1; fi
+          done
+          exit $fail

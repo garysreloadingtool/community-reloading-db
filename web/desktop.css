@@ -1,0 +1,29 @@
+/* Desktop layout (index.html). */
+  #app { display: grid; height: 100vh; grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); gap: 8px; padding: 8px; }
+  #main { grid-column: 1; grid-row: 1; display: grid; grid-template-rows: 36px minmax(0, 1fr) 22px; gap: 8px; min-height: 0; }
+  header { display: flex; align-items: center; gap: 8px; }
+  header select { width: 220px; }
+  header button { white-space: nowrap; }
+  header .sp { flex: 1; }
+  #body { display: grid; grid-template-columns: 370px minmax(0, 1fr); gap: 8px; min-height: 0; }
+  #left { display: flex; flex-direction: column; gap: 8px; min-height: 0; }
+  #left .panel { display: flex; flex-direction: column; gap: 4px; }
+  #left .panel { flex: 0 1 auto; min-height: 120px; }
+  #left .panel:nth-child(2) { flex-shrink: 0; }
+  #left .panel.pw { flex: 1 1 0; min-height: 190px; }
+
+  .ph { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+  .ph h2 { margin: 0; }
+  #right { display: grid; grid-template-rows: auto 54px minmax(0, 1fr); gap: 8px; min-height: 0; }
+  #top { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 8px; }
+  #res { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 2px 18px; margin-top: 6px; }
+  #res .kv:nth-last-child(1) { grid-column: span 2; }
+  #vivp { display: flex; flex-direction: column; }
+  #vivp canvas { flex: 1; min-height: 120px; }
+  #ladp { display: flex; align-items: center; gap: 8px; padding: 6px 10px; }
+  #ladp h2 { margin: 0; white-space: nowrap; }
+  #ladder { flex: 1; }
+  #chartp { position: relative; }
+  footer { display: flex; justify-content: space-between; gap: 12px; align-items: center; }
+  footer a { color: var(--muted); }
+  #results { display: contents; }

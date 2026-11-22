@@ -48,7 +48,7 @@
   });
 
   function fillSelect(sel, list, placeholder) {
-    sel.innerHTML = '';
+    sel.innerHTML = GRTHTML('');
     var o = document.createElement('option'); o.value = ''; o.textContent = placeholder; sel.appendChild(o);
     list.forEach(function (it, i) { var op = document.createElement('option'); op.value = i; op.textContent = it.name; sel.appendChild(op); });
   }
@@ -60,10 +60,10 @@
   // ---------- build inputs ----------
   function buildFields() {
     Object.keys(F).forEach(function (grp) {
-      var box = $('f-' + grp); if (!box) return; box.innerHTML = '';
+      var box = $('f-' + grp); if (!box) return; box.innerHTML = GRTHTML('');
       F[grp].forEach(function (f) {
         var row = document.createElement('label'); row.className = 'row';
-        row.innerHTML = '<span class="lbl">' + f[1] + '</span><input type="number" step="any" id="in-' + f[0] + '"><span class="unit">' + unitLabel(f[2]) + '</span>';
+        row.innerHTML = GRTHTML('<span class="lbl">' + f[1] + '</span><input type="number" step="any" id="in-' + f[0] + '"><span class="unit">' + unitLabel(f[2]) + '</span>');
         if (['Ba','a0','z1','z2','Qex','k','pc','pcd','eta','tcc','tch'].indexOf(f[0]) >= 0) row.classList.add('adv');
         box.appendChild(row);
         row.querySelector('input').addEventListener('change', function (e) {
@@ -123,11 +123,11 @@
     var r = results[focus]; if (!r) return;
     var sum = $('summary');
     if (sum) sum.innerHTML =
-      '<div class="t">' + esc(S.caliberName || 'Custom caliber') + '</div>' +
+      GRTHTML('<div class="t">' + esc(S.caliberName || 'Custom caliber') + '</div>' +
       '<div>' + esc(S.projName || 'Custom bullet') + '</div>' +
       '<div>' + esc(S.powderName || 'Custom powder') + ' · ' + fmt(toDisp(r.mc, 'mass'), 'mass') + ' ' + unitLabel('mass') + '</div>' +
       '<div class="muted">Seating depth ' + fmt(toDisp(r.seat, 'len'), 'len') + ' ' + unitLabel('len') + ' · free volume ' + fmt(toDisp(r.freeVol, 'vol'), 'vol') + ' ' + unitLabel('vol') + '</div>' +
-      (S.baCal && S.baCal !== 1 ? '<div class="muted">Chrono-calibrated' + (S.calName ? ' (' + esc(S.calName) + ')' : '') + ': Ba ×' + S.baCal.toFixed(3) + '</div>' : '');
+      (S.baCal && S.baCal !== 1 ? '<div class="muted">Chrono-calibrated' + (S.calName ? ' (' + esc(S.calName) + ')' : '') + ': Ba ×' + S.baCal.toFixed(3) + '</div>' : ''));
     var kv = [
       ['Max. pressure', fmt(toDisp(r.pmax, 'pres'), 'pres') + ' ' + unitLabel('pres'), r.overPmax ? 'bad' : 'p'],
       ['Muzzle pressure', fmt(toDisp(r.pmuzzle, 'pres'), 'pres') + ' ' + unitLabel('pres'), 'p'],
@@ -139,14 +139,14 @@
       ['Efficiency', r.eff.toFixed(1) + ' %', ''],
       ['IPSC factor', r.ipsc.toFixed(1), '']];
     var res = $('results');
-    if (res) res.innerHTML = kv.map(function (k) { return '<div class="kv ' + k[2] + '"><span>' + k[0] + '</span><b>' + k[1] + '</b></div>'; }).join('') +
-      (r.overPmax ? '<div class="warn">⚠ Exceeds the caliber\'s maximum pressure</div>' : '');
+    if (res) res.innerHTML = GRTHTML(kv.map(function (k) { return '<div class="kv ' + k[2] + '"><span>' + k[0] + '</span><b>' + k[1] + '</b></div>'; }).join('') +
+      (r.overPmax ? '<div class="warn">⚠ Exceeds the caliber\'s maximum pressure</div>' : ''));
     var lad = $('ladder');
-    if (lad) lad.innerHTML = results.length < 2 ? '<span class="muted">Ladder off (steps = 1)</span>' :
+    if (lad) lad.innerHTML = GRTHTML(results.length < 2 ? '<span class="muted">Ladder off (steps = 1)</span>' :
       results.map(function (q, i) {
         return '<button class="lstep' + (i === focus ? ' on' : '') + (q.overPmax ? ' over' : '') + '" data-i="' + i + '">' +
           fmt(toDisp(q.mc, 'mass'), 'mass') + '<small>' + (imperial ? (q.v * 3.28084).toFixed(0) : q.v.toFixed(0)) + '</small></button>';
-      }).join('');
+      }).join(''));
     drawMain(); drawViv();
   }
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
@@ -264,7 +264,7 @@
   }
   var nf = function (o, k, d) { var v = parseFloat(o[k]); return isNaN(v) ? (d || 0) : v; };
   function importText(text, fname) {
-    var doc = new DOMParser().parseFromString(text.replace(/<svar/g, '<var'), 'application/xml');
+    var doc = new DOMParser().parseFromString(GRTXML(text.replace(/<svar/g, '<var')), 'application/xml');
     if (doc.querySelector('parsererror')) throw new Error('Not a valid XML file');
     var ib = doc.querySelector('InnerBallistikInput'), added = 0;
     if (ib) {

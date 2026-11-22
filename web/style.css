@@ -96,3 +96,7 @@ body.gated #app { visibility: hidden; }
 /* share item dialog */
 .ikinds button { flex: 1; }
 #f-caliber, #f-projectile { min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding-right: 2px; }
+
+/* small utilities (used instead of inline style attributes, which the CSP blocks) */
+.mt6 { margin-top: 6px; } .mt8 { margin-top: 8px; } .mt10 { margin-top: 10px; } .mtauto { margin-top: auto; }
+.flex1 { flex: 1; } .pad8 { padding: 8px; } .nocase { text-transform: none; }
