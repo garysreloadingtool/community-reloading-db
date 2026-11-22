@@ -38,7 +38,9 @@
 
   // ---------- databases (built-in + user imports) ----------
   var user = store.get('userdb') || { calibers: [], projectiles: [], powders: [] };
-  function all(kind) { return (user[kind] || []).concat(DB[kind]); }
+  // Shared items from the community database (community/items.json), set by items.js.
+  var comm = { calibers: [], projectiles: [], powders: [], loads: [] };
+  function all(kind) { return (user[kind] || []).concat(DB[kind], comm[kind] || []); }
   // Powders that only appear inside shared loads are offered too.
   DB.loads.forEach(function (L) {
     if (!DB.powders.some(function (p) { return p.name.indexOf(L.powder.name) === 0; }))
@@ -235,7 +237,8 @@
   window.GRTApp = {
     state: function () { return S; }, setState: function (o) { Object.assign(S, o); populate(); compute(); },
     simAt: simAt, fitBa: fitBa, fmt: fmt, toDisp: toDisp, fromDisp: fromDisp, unitLabel: unitLabel, velDisp: velDisp, velFrom: velFrom,
-    imperial: function () { return imperial; }, toast: toast, store: store, esc: esc, $: $
+    imperial: function () { return imperial; }, toast: toast, store: store, esc: esc, $: $,
+    setCommunity: function (d) { comm = d; if (lists.calibers) populate(); }
   };
 
   // ---------- file import / export ----------
@@ -300,7 +303,7 @@
   // ---------- selects ----------
   var lists = {};
   function populate() {
-    lists.loads = DB.loads; lists.calibers = all('calibers'); lists.powders = all('powders'); lists.projectiles = projList();
+    lists.loads = DB.loads.concat(comm.loads); lists.calibers = all('calibers'); lists.powders = all('powders'); lists.projectiles = projList();
     fillSelect($('selLoad'), lists.loads, 'Example loads (' + lists.loads.length + ')…');
     fillSelect($('selCaliber'), lists.calibers, 'Caliber (' + lists.calibers.length + ')…');
     fillSelect($('selProjectile'), lists.projectiles, 'Bullet (' + lists.projectiles.length + ')…');

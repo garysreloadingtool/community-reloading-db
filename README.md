@@ -36,4 +36,5 @@ Fitting uses the record's own barrel length, temperature and measurements, not w
 - **Submitting:** a pre-filled GitHub issue. `.github/workflows/calibration-submission.yml` validates it with
   `tools/validate_community.js` and opens a PR for a maintainer to review.
 - **Privacy:** serial number and location are never shared, and notes only when the user ticks "include notes".
-- **Setup:** push this project to a GitHub repository, then set both URLs in `web/config.js` (see `community/README.md`).
+- **Shared calibers, bullets, powders and loads:** **Share** on the main screen (More tab on mobile) sends the current item the same way, via `tools/validate_items.js`, into `community/items.json`. Merged items appear in the dropdowns marked ☁ and are cached for offline use.
+- **Setup:** push this project to a GitHub repository, then set the URLs in `web/config.js` (see `community/README.md`).

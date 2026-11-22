@@ -18,7 +18,8 @@
   #app { display: grid; height: 100vh; grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); gap: 8px; padding: 8px; }
   #main { grid-column: 1; grid-row: 1; display: grid; grid-template-rows: 36px minmax(0, 1fr) 22px; gap: 8px; min-height: 0; }
   header { display: flex; align-items: center; gap: 8px; }
-  header select { width: 260px; }
+  header select { width: 220px; }
+  header button { white-space: nowrap; }
   header .sp { flex: 1; }
   #body { display: grid; grid-template-columns: 370px minmax(0, 1fr); gap: 8px; min-height: 0; }
   #left { display: flex; flex-direction: column; gap: 8px; min-height: 0; }
@@ -52,6 +53,7 @@
       <div class="sp"></div>
       <button id="btnOpen" title="Open .grtload / .caliber / .projectile / .propellant">Open…</button>
       <button id="btnSave" title="Download this load as .grtload">Save</button>
+      <button id="btnShare" title="Share this load, caliber, bullet or powder with the community">Share</button>
       <button id="btnUnits" title="Switch units">Imperial</button>
       <button id="btnCal" title="Fit powder to your chronograph data">Calibrate</button>
       <button id="btnAdv" title="Show powder model parameters">Powder model</button>
@@ -131,6 +133,15 @@
   <pre id="shPreview"></pre>
   <div class="cbtns"><button id="shSubmit" class="on">Open GitHub issue</button><button id="shDownload">Download</button><span class="sp"></span><button data-close>Cancel</button></div>
 </div></div>
+<div id="ishare" class="modal" hidden><div class="box">
+  <h3>Share with the community</h3>
+  <p class="muted">Shares the current item with everyone using the site. It opens a GitHub issue (free account needed), and a maintainer reviews it before it appears in the lists (marked ☁).</p>
+  <div class="cbtns ikinds"><button data-ikind="load">Whole load</button><button data-ikind="caliber">Caliber</button><button data-ikind="projectile">Bullet</button><button data-ikind="powder">Powder</button></div>
+  <div class="mfilter" style="margin-top:8px"><input id="isName" type="text" maxlength="120" placeholder="Name"></div>
+  <div class="mfilter" style="margin-top:6px"><input id="isHandle" type="text" maxlength="40" placeholder="Name to credit (optional)"><input id="isNotes" type="text" maxlength="500" placeholder="Notes, e.g. source of the data (optional)"></div>
+  <pre id="isPreview"></pre>
+  <div class="cbtns"><button id="isSubmit" class="on">Open GitHub issue</button><button id="isDownload">Download</button><span class="sp"></span><button data-close>Cancel</button></div>
+</div></div>
 <div id="toast" class="toast"></div>
 <script src="config.js"></script>
 <script src="data.js"></script>
@@ -138,5 +149,6 @@
 <script src="app.js"></script>
 <script src="calib.js"></script>
 <script src="community.js"></script>
+<script src="items.js"></script>
 </body>
 </html>

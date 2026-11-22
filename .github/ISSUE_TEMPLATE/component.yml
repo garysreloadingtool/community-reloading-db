@@ -1,0 +1,16 @@
+name: Share a caliber, bullet, powder or load
+description: Caliber, bullet, powder or load shared from Gary's Reloading Tool
+title: "Shared: "
+labels: ["component"]
+body:
+  - type: markdown
+    attributes:
+      value: The website's Share button fills this in. A maintainer reviews every submission before it is published.
+  - type: textarea
+    id: data
+    attributes:
+      label: Item data
+      description: JSON from the website's Share dialog. If it is empty, paste the JSON (or the downloaded file's contents) here.
+      render: json
+    validations:
+      required: true

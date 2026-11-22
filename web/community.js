@@ -95,12 +95,13 @@
   function submit() {
     var p = payload(), json = JSON.stringify(p, null, 1);
     if (!CFG.communitySubmitUrl || /OWNER\/REPO/.test(CFG.communitySubmitUrl)) return A.toast('Sharing is not configured yet (see config.js). Use "Download" instead.', true);
-    var body = 'Calibration submitted from Gary\'s Reloading Tool.\n\n```json\n' + json + '\n```\n';
-    var url = CFG.communitySubmitUrl + '?labels=calibration&title=' + encodeURIComponent('Calibration: ' + p.name) + '&body=' + encodeURIComponent(body);
+    // The issue form applies the "calibration" label for everyone and puts the JSON in its "data" field.
+    var base = CFG.communitySubmitUrl + '?template=calibration.yml&title=' + encodeURIComponent('Calibration: ' + p.name);
+    var url = base + '&data=' + encodeURIComponent(json);
     if (url.length > 7500) {   // GitHub truncates long URLs: copy the data and let the user paste it
       var copy = navigator.clipboard ? navigator.clipboard.writeText(json) : Promise.reject();
-      copy.then(function () { A.toast('Data copied. Paste it into the issue body.'); }, function () { download(p); A.toast('Data downloaded. Attach the file to the issue.'); });
-      url = CFG.communitySubmitUrl + '?labels=calibration&title=' + encodeURIComponent('Calibration: ' + p.name) + '&body=' + encodeURIComponent('Paste the calibration JSON here:\n\n```json\n\n```\n');
+      copy.then(function () { A.toast('Data copied. Paste it into the issue form.'); }, function () { download(p); A.toast('Data downloaded. Paste its contents into the issue form.'); });
+      url = base;
     }
     window.open(url, '_blank', 'noopener'); $('cshare').hidden = true;
   }

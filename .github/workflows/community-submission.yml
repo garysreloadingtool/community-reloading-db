@@ -1,6 +1,8 @@
-# Turns a "calibration" issue into a pull request that adds it to community/calibrations.json.
-# A maintainer reviews and merges the PR; nothing is published automatically.
-name: Calibration submission
+# Turns a community submission issue into a pull request. A maintainer reviews and merges the PR;
+# nothing is published automatically.
+#   label "calibration": chronograph calibration -> community/calibrations.json
+#   label "component":   caliber / projectile / powder / load -> community/items.json
+name: Community submission
 on:
   issues:
     types: [opened, edited, labeled]
@@ -10,12 +12,16 @@ permissions:
   issues: write
 # One run at a time per issue: a new issue with the label fires both "opened" and "labeled".
 concurrency:
-  group: calibration-issue-${{ github.event.issue.number }}
+  group: community-issue-${{ github.event.issue.number }}
   cancel-in-progress: false
 jobs:
   submit:
-    if: contains(github.event.issue.labels.*.name, 'calibration') && (github.event.action != 'labeled' || github.event.label.name == 'calibration')
+    if: >-
+      (contains(github.event.issue.labels.*.name, 'calibration') || contains(github.event.issue.labels.*.name, 'component')) &&
+      (github.event.action != 'labeled' || github.event.label.name == 'calibration' || github.event.label.name == 'component')
     runs-on: ubuntu-latest
+    env:
+      KIND: ${{ contains(github.event.issue.labels.*.name, 'calibration') && 'calibration' || 'component' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -27,27 +33,32 @@ jobs:
           ISSUE_NUMBER: ${{ github.event.issue.number }}
         run: |
           set -o pipefail
-          node tools/validate_community.js community/calibrations.json 2>&1 | tee result.txt
+          if [ "$KIND" = calibration ]; then
+            node tools/validate_community.js community/calibrations.json 2>&1 | tee result.txt
+          else
+            node tools/validate_items.js community/items.json 2>&1 | tee result.txt
+          fi
       - name: Open pull request
         if: success()
         env:
           GH_TOKEN: ${{ github.token }}
           N: ${{ github.event.issue.number }}
         run: |
+          if [ "$KIND" = calibration ]; then DB=community/calibrations.json; WHAT="calibration"; else DB=community/items.json; WHAT="shared item"; fi
           git config user.name "github-actions[bot]"
           git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
-          BR="calibration/issue-$N"
-          if git fetch -q origin "$BR" 2>/dev/null && git diff --quiet FETCH_HEAD -- community/calibrations.json; then
+          BR="$KIND/issue-$N"
+          if git fetch -q origin "$BR" 2>/dev/null && git diff --quiet FETCH_HEAD -- "$DB"; then
             echo "Same data as the existing pull request; nothing to do."; exit 0
           fi
           git checkout -B "$BR"
-          git add community/calibrations.json
-          git commit -m "Add community calibration from issue #$N"
+          git add "$DB"
+          git commit -m "Add community $WHAT from issue #$N"
           git push -f origin "$BR"
           if gh pr view "$BR" --json state -q .state 2>/dev/null | grep -q OPEN; then
             gh issue comment "$N" --body "Updated: the edited data passed validation. The pull request now has the new version: $(gh pr view "$BR" --json url -q .url)"
           else
-            gh pr create --head "$BR" --title "Calibration from issue #$N" --body "Closes #$N. Validated automatically; please review before merging."
+            gh pr create --head "$BR" --title "Community $WHAT from issue #$N" --body "Closes #$N. Validated automatically; please review before merging."
             gh issue comment "$N" --body "Thanks! The data passed validation and is waiting for review: $(gh pr view "$BR" --json url -q .url)"
           fi
       - name: Report problems

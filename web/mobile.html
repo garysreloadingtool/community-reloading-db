@@ -46,8 +46,9 @@
   #calib .ccol:not(:has(> :not(.off))) { display: none; }
   #cShots { height: 150px !important; } .cnotes { display: flex; }
   .modal .mbox { height: 100%; border-radius: 0; padding: 8px; }
-  #mcomm, #cshare { padding: 0; } #cshare .box { height: 100%; border-radius: 0; display: flex; flex-direction: column; }
-  #shPreview { flex: 1; height: auto; } .mrow button { padding: 6px; }
+  #mcomm, #cshare, #ishare { padding: 0; } #cshare .box, #ishare .box { height: 100%; border-radius: 0; display: flex; flex-direction: column; }
+  #ishare .mfilter { flex-wrap: wrap; } #ishare .mfilter input { flex: 1 1 100%; } #ishare p { font-size: 12px; }
+  #shPreview, #isPreview { flex: 1; height: auto; min-height: 60px; } .mrow button { padding: 6px; }
   .cbtns button { padding: 5px 6px; font-size: 12.5px; }
 </style>
 </head>
@@ -86,6 +87,7 @@
       <h2>Example loads</h2><select id="selLoad"></select>
       <h2 style="margin-top:10px">Files</h2>
       <div class="tools"><button id="btnOpen">Open file…</button><button id="btnSave">Save load</button></div>
+      <button id="btnShare">Share load, caliber, bullet or powder</button>
       <h2 style="margin-top:10px">Chronograph</h2>
       <button id="btnCal">Calibrate powder to measured velocities</button>
       <h2 style="margin-top:10px">Powder model</h2>
@@ -158,6 +160,15 @@
   <pre id="shPreview"></pre>
   <div class="cbtns"><button id="shSubmit" class="on">Open GitHub issue</button><button id="shDownload">Download</button><span class="sp"></span><button data-close>Cancel</button></div>
 </div></div>
+<div id="ishare" class="modal" hidden><div class="box">
+  <h3>Share with the community</h3>
+  <p class="muted">Shares the current item with everyone using the site. It opens a GitHub issue (free account needed), and a maintainer reviews it before it appears in the lists (marked ☁).</p>
+  <div class="cbtns ikinds"><button data-ikind="load">Whole load</button><button data-ikind="caliber">Caliber</button><button data-ikind="projectile">Bullet</button><button data-ikind="powder">Powder</button></div>
+  <div class="mfilter" style="margin-top:8px"><input id="isName" type="text" maxlength="120" placeholder="Name"></div>
+  <div class="mfilter" style="margin-top:6px"><input id="isHandle" type="text" maxlength="40" placeholder="Name to credit (optional)"><input id="isNotes" type="text" maxlength="500" placeholder="Notes, e.g. source of the data (optional)"></div>
+  <pre id="isPreview"></pre>
+  <div class="cbtns"><button id="isSubmit" class="on">Open GitHub issue</button><button id="isDownload">Download</button><span class="sp"></span><button data-close>Cancel</button></div>
+</div></div>
 <div id="toast" class="toast"></div>
 <script src="config.js"></script>
 <script src="data.js"></script>
@@ -165,5 +176,6 @@
 <script src="app.js"></script>
 <script src="calib.js"></script>
 <script src="community.js"></script>
+<script src="items.js"></script>
 </body>
 </html>
