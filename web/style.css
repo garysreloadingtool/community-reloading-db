@@ -89,3 +89,6 @@ body.gated #app { visibility: hidden; }
 .mfoot { display: flex; gap: 6px; align-items: center; } .mfoot .sp { flex: 1; } #mStatus { font-size: 11.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
 #shPreview { background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 6px; font-size: 11px; height: 220px; overflow: hidden; margin: 8px 0; white-space: pre-wrap; }
 #mPage { white-space: nowrap; }
+
+/* powder & charge: the extra model rows can exceed the panel, so this list scrolls */
+#f-powder { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding-right: 2px; }
