@@ -13,7 +13,7 @@ How submissions work:
 2. `.github/workflows/community-submission.yml` runs `tools/validate_community.js` or `tools/validate_items.js`.
    They keep only whitelisted fields, check types and ranges, and the workflow opens a pull request.
    Users get a comment if the data is invalid; editing the issue re-runs the check and updates the PR.
-3. A maintainer reviews and merges the PR. The app picks up calibrations on the next **Refresh** in the community
+3. A maintainer reviews and merges the PR. Calibration PRs need an approving review from a code owner (see `.github/CODEOWNERS`) before they can be merged. The app picks up calibrations on the next **Refresh** in the community
    dialog, and shared items (marked ☁ in the dropdowns) on the next page load. Both are cached for offline use.
 
 Setup: create the `calibration` and `component` labels and allow Actions to create pull requests
