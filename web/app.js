@@ -150,7 +150,7 @@
       '<div>' + esc(S.powderName || 'Custom powder') + ' · ' + fmt(toDisp(r.mc, 'mass'), 'mass') + ' ' + unitLabel('mass') + '</div>' +
       '<div class="muted">Seating depth ' + fmt(toDisp(r.seat, 'len'), 'len') + ' ' + unitLabel('len') + ' · free volume ' + fmt(toDisp(r.freeVol, 'vol'), 'vol') + ' ' + unitLabel('vol') + '</div>' +
       (S.powderFit ? '<div class="muted">Fitted powder: velocity typically within ±' + (S.powderFit.velErrMedian * 100).toFixed(1) +
-        ' % of published data; pressure is a rough estimate (±25 %). Never exceed published maximum loads.</div>' : '') +
+        ' % of published data' + (S.powderFit.velErr90 ? ', 9 in 10 loads within ±' + (S.powderFit.velErr90 * 100).toFixed(0) + ' %' : '') + '; pressure is a rough estimate (±25 %). Never exceed published maximum loads.</div>' : '') +
       (S.baCal && S.baCal !== 1 ? '<div class="muted">Chrono-calibrated' + (S.calName ? ' (' + esc(S.calName) + ')' : '') + ': Ba ×' + S.baCal.toFixed(3) + '</div>' : ''));
     var kv = [
       ['Max. pressure', fmt(toDisp(r.pmax, 'pres'), 'pres') + ' ' + unitLabel('pres'), r.overPmax ? 'bad' : 'p'],
