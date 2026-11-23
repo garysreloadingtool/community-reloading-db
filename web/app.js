@@ -26,6 +26,7 @@
     caliber: [
       ['caselen', 'Case length (L3)', 'len'], ['oal', 'Cartridge OAL (L6)', 'len'], ['casevol', 'Case volume', 'vol'],
       ['groove', 'Groove diameter', 'len'], ['pmax', 'Max. pressure', 'pres'], ['barrel', 'Barrel length', 'len'],
+      ['gap', 'Revolver cylinder gap (0 = none)', 'len'], ['cyl', 'Revolver cylinder length', 'len'],
       ['ps', 'Shot-start pressure', 'pres'], ['sebert', 'Sebert factor', 'none']],
     projectile: [['mp', 'Bullet weight', 'mass'], ['blen', 'Bullet length', 'len'], ['friction', 'Extra bore friction', 'pres']],
     powder: [['mc', 'Charge weight', 'mass'], ['T', 'Powder temperature', 'temp'], ['laddercnt', 'Ladder steps', 'none'],
@@ -85,7 +86,10 @@
     S.caliberName = c.name; S.caselen = c.caselen; S.oal = c.oal || S.oal; S.casevol = c.casevol || c.casevolGrH2O * E.GRH2O_CM3;
     S.groove = c.groove; S.aeff = c.aeff || 0; S.pmax = c.pmax; S.sebert = c.sebert || 0.5; S.ps = c.ps || S.ps || 250;
     S.barrel = c.barrel || (c.caselen < 35 && c.oal < 45 ? 127 : 610);
+    S.gap = c.revolver ? (c.gap || 0.15) : 0; S.cyl = c.cyl || Math.round(((S.oal || 0) + 1) * 100) / 100;
   }
+  // Revolver: barrel is measured from the cylinder face; gas leaks through the cylinder gap.
+  function revolverObj() { return S.gap > 0 ? { gap: S.gap, cyl: S.cyl || (S.oal + 1) } : null; }
   function applyProjectile(p) {
     S.projName = p.name; S.mp = p.mass || p.massGr * E.GR; S.blen = p.len; S.friction = p.friction || 0;
   }
@@ -109,7 +113,7 @@
     for (var i = 0; i < n; i++) {
       var mc = S.mc - i * (n > 1 ? S.laddermc : 0); if (mc <= 0) break;
       var r = E.simulate({ casevol: S.casevol, groove: S.groove, aeff: S.aeff, oal: S.oal, caselen: S.caselen, barrel: S.barrel,
-        ps: S.ps, sebert: S.sebert, mp: S.mp, blen: S.blen, friction: S.friction, mc: mc, T: S.T, powder: powderObj(), pmax: S.pmax });
+        ps: S.ps, sebert: S.sebert, mp: S.mp, blen: S.blen, friction: S.friction, mc: mc, T: S.T, powder: powderObj(), pmax: S.pmax, revolver: revolverObj() });
       r.mc = mc; results.push(r);
     }
     if (focus >= results.length) focus = 0;
@@ -225,7 +229,7 @@
   }
   function simAt(mc, f, over) {
     return E.simulate(Object.assign({ casevol: S.casevol, groove: S.groove, aeff: S.aeff, oal: S.oal, caselen: S.caselen, barrel: S.barrel, ps: S.ps, sebert: S.sebert,
-      mp: S.mp, blen: S.blen, friction: S.friction, mc: mc, T: S.T, powder: Object.assign(powderObj(), { Ba: S.Ba * f }) }, over || {}));
+      mp: S.mp, blen: S.blen, friction: S.friction, mc: mc, T: S.T, revolver: revolverObj(), powder: Object.assign(powderObj(), { Ba: S.Ba * f }) }, over || {}));
   }
   function fitBa(meas, over) {
     var err = function (f) { return meas.reduce(function (a, m) { var d = simAt(m.mc, f, over).v / m.v - 1; return a + d * d * (m.n || 1); }, 0); };

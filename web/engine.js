@@ -8,7 +8,7 @@
 
   // Model constants. KBA and KHEAT are fitted to measured chronograph data (see tools/fit_model.js).
   // hw: wall heat-transfer coefficient (W per m² of wall at flame temperature), fitted in validation.
-  var K = { ba: 0.748, hw: 1.5e7, prog: 1 };   // hw chosen 2026-11-22 against ~10,000 published pressures
+  var K = { ba: 0.748, hw: 1.5e7, prog: 1, cd: 0.8, step: 1 };   // hw: fitted to ~10,000 published pressures; cd: revolver cylinder-gap discharge coefficient, fitted to revolver loads
 
   // Three-phase form function phi(z), phi(0)=1 so that Ba is the start of the vivacity curve:
   // phase 1 (0..z1) linear with slope a0, phase 2 (z1..z2) linear transition, phase 3 (z2..1) degressive burnout.
@@ -28,14 +28,20 @@
   }
 
   /* inp: { casevol cm3, groove mm, aeff mm2 (optional), oal mm, caselen mm, barrel mm,
-   *        ps bar, sebert, mp g, blen mm, friction bar, mc g, T °C, powder{...} } */
+   *        ps bar, sebert, mp g, blen mm, friction bar, mc g, T °C, powder{...},
+   *        revolver: { gap mm, cyl mm } (optional; barrel is then measured from the cylinder face) } */
   function simulate(inp) {
     var pw = inp.powder;
     var A = (inp.aeff > 0 ? inp.aeff : Math.PI / 4 * inp.groove * inp.groove * 0.985) * 1e-6;
     var bore = Math.PI / 4 * inp.groove * inp.groove * 1e-6;
     var seat = Math.max(0, inp.caselen - (inp.oal - inp.blen));   // seating depth mm
     var V0 = inp.casevol * 1e-6 - bore * seat * 1e-3;            // free case volume m3
-    var travel = Math.max(0.005, (inp.barrel - (inp.oal - inp.blen) ) * 1e-3);
+    var rv = inp.revolver && inp.revolver.gap > 0 ? inp.revolver : null;
+    var cylLen = rv ? Math.max(rv.cyl || 0, inp.oal) : 0;                  // case head to cylinder face, mm
+    var travel = Math.max(0.005, ((rv ? cylLen + inp.barrel : inp.barrel) - (inp.oal - inp.blen)) * 1e-3);
+    // Cylinder gap: once the bullet base passes the cylinder face, gas escapes through a ring of area pi * bore * gap
+    // as choked (sonic) flow, taking its mass and enthalpy with it.
+    var xGap = rv ? (cylLen - (inp.oal - inp.blen)) * 1e-3 : Infinity, Agap = rv ? Math.PI * inp.groove * rv.gap * 1e-6 : 0;
     var mc = inp.mc * 1e-3, mp = inp.mp * 1e-3, k = pw.k;
     var F = (k - 1) * pw.Qex * 1e3;                               // specific force
     var eta = (pw.eta || 1) * 1e-3, rho = pw.pc || 1600;
@@ -55,51 +61,61 @@
                fill: mc / (pw.pcd || 900) * 1e6 / inp.casevol * 100, eff: NaN, ipsc: NaN, curve: [], overPmax: false };
     }
     var tooDense = false;
-    var gasP = function (z, x, v, Q) {
-      var vol = V0 + A * x - mc * (1 - z) / rho - eta * mc * z;
+    var choke = Math.pow(2 / (k + 1), (k + 1) / (2 * (k - 1)));
+    var gasVolNow = 0, gasMassNow = 0;
+    var gasP = function (z, x, v, Q, Ml, Wl) {
+      var mg = mc * z - (Ml || 0);
+      var vol = V0 + A * x - mc * (1 - z) / rho - eta * mg;
       if (vol < 0.02 * V0) { tooDense = true; vol = 0.02 * V0; }
-      var e = F * mc * z - (k - 1) * (0.5 * meff * v * v + Q);
+      var e = F * mc * z - (k - 1) * (0.5 * meff * v * v + Q) - (Wl || 0);
+      gasVolNow = vol; gasMassNow = mg;
       return Math.max(pIgn, pIgn + e / vol);
     };
     // derivatives of (z, x, v, Q) for pressure p; moving decided per step
     var moving = false;
-    function deriv(z, x, v, Q, out) {
-      var p = gasP(z, x, v, Q);
-      var gen = F * mc * z, Trel = gen > 0 ? Math.max(0, (gen - (k - 1) * (0.5 * meff * v * v + Q)) / gen) : 0;
+    function deriv(z, x, v, Q, out, Ml, Wl) {
+      var p = gasP(z, x, v, Q, Ml, Wl);
+      var gen = F * mc * z, Trel = gen > 0 ? Math.max(0, (gen - (k - 1) * (0.5 * meff * v * v + Q) - (Wl || 0)) / gen) : 0;
       out[0] = z < 1 ? Ba * phi(z, pw) * (p / 1e5) : 0;
       out[1] = v;
       out[2] = moving ? A * Math.max(0, p / (1 + mc / (3 * meff)) - pfric) / meff : 0;
       out[3] = K.hw * (Awall0 + Pbore * x) * Trel / (k - 1);
+      // gap leak: mass rate (kg/s) and the matching loss of (k-1)*internal energy, i.e. k * (e per kg) * mdot
+      var md = 0;
+      if (x >= xGap && gasMassNow > 0 && p > pIgn) md = K.cd * Agap * choke * Math.sqrt(k * (p - pIgn) * gasMassNow / gasVolNow);
+      out[4] = md; out[5] = md > 0 ? k * (p - pIgn) * gasVolNow / gasMassNow * md : 0;
       return p;
     }
-    var z = 0, x = 0, v = 0, Q = 0, t = 0;
+    var z = 0, x = 0, v = 0, Q = 0, t = 0, Ml = 0, Wl = 0;
     var pmax = 0, xpmax = 0, tpmax = 0, out = [], lastOut = -1, burnout = null;
-    var d1 = [0, 0, 0, 0], d2 = [0, 0, 0, 0];
+    var d1 = [0, 0, 0, 0, 0, 0], d2 = [0, 0, 0, 0, 0, 0];
     while (t < 0.05) {
-      var p = deriv(z, x, v, Q, d1);
+      var p = deriv(z, x, v, Q, d1, Ml, Wl);
       if (p > pmax) { pmax = p; xpmax = x; tpmax = t; }
-      if (!moving && p >= ps) { moving = true; deriv(z, x, v, Q, d1); }
+      if (!moving && p >= ps) { moving = true; deriv(z, x, v, Q, d1, Ml, Wl); }
       if (t - lastOut >= 4e-6) { out.push([x, p, v, t, z]); lastOut = t; }
       // adaptive step: at most 0.2 % of the charge burns per step, 0.05 mm of travel, and never over 0.2 µs
-      var dt = 2e-7;
-      if (d1[0] > 0) dt = Math.min(dt, 0.002 / d1[0]);
-      if (v > 0) dt = Math.min(dt, 5e-5 / v);
+      var sf = K.step, dt = 2e-7 * sf;                            // K.step > 1 only for bulk fitting (coarser, faster)
+      if (d1[0] > 0) dt = Math.min(dt, 0.002 * sf / d1[0]);
+      if (v > 0) dt = Math.min(dt, 5e-5 * sf / v);
       dt = Math.max(dt, 1e-10);
       // midpoint (2nd-order Runge-Kutta) step
-      deriv(Math.min(1, z + d1[0] * dt / 2), x + d1[1] * dt / 2, v + d1[2] * dt / 2, Q + d1[3] * dt / 2, d2);
-      z = Math.min(1, z + d2[0] * dt); x += d2[1] * dt; v += d2[2] * dt; Q += d2[3] * dt; t += dt;
+      if (d1[4] > 0) dt = Math.min(dt, 0.01 * Math.max(gasMassNow, 1e-9) / d1[4]);
+      dt = Math.max(dt, 1e-10);
+      deriv(Math.min(1, z + d1[0] * dt / 2), x + d1[1] * dt / 2, v + d1[2] * dt / 2, Q + d1[3] * dt / 2, d2, Ml + d1[4] * dt / 2, Wl + d1[5] * dt / 2);
+      z = Math.min(1, z + d2[0] * dt); x += d2[1] * dt; v += d2[2] * dt; Q += d2[3] * dt; Ml += d2[4] * dt; Wl += d2[5] * dt; t += dt;
       if (z >= 1 && burnout == null) burnout = x;
       if (x >= travel || tooDense) break;
     }
     if (tooDense) return { invalid: 'Charge too dense for the model: the gas has no room before the bullet moves (check case volume and charge).',
       pmax: NaN, pmuzzle: NaN, v: NaN, E: NaN, t: t, z: z, travel: travel, xpmax: 0, tpmax: 0, burnoutX: null, seat: seat, freeVol: V0 * 1e6,
       fill: mc / (pw.pcd || 900) * 1e6 / inp.casevol * 100, eff: NaN, ipsc: NaN, curve: [], overPmax: false };
-    var pm = gasP(z, x, v, Q);
+    var pm = gasP(z, x, v, Q, Ml, Wl);
     out.push([x, pm, v, t, z]);
     var E = 0.5 * mp * v * v;
     var powderVol = mc / (pw.pcd || 900) * 1e6;
     return {
-      heatLoss: Q, pmax: pmax / 1e5, pmuzzle: pm / 1e5, v: v, E: E, t: t, z: z, travel: travel,
+      heatLoss: Q, gapLoss: mc > 0 ? Ml / mc : 0, pmax: pmax / 1e5, pmuzzle: pm / 1e5, v: v, E: E, t: t, z: z, travel: travel,
       xpmax: xpmax, tpmax: tpmax, burnoutX: burnout, seat: seat, freeVol: V0 * 1e6,
       fill: powderVol / inp.casevol * 100, eff: E / (mc * pw.Qex * 1e3) * 100,
       ipsc: (inp.mp / GR) * (v * 3.28084) / 1000, curve: out, overPmax: inp.pmax ? pmax / 1e5 > inp.pmax : false
