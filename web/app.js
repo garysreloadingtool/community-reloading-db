@@ -55,10 +55,17 @@
   }
   // Bullet list filter: bullets matching the caliber's groove (default), all, or one bullet diameter.
   function diaKey(mm) { return Math.round(mm / 25.4 * 1000); }          // diameter in thousandths of an inch
+  // Rifle-only bullets (hidden while a handgun caliber is selected; rifle calibers list every bullet). A handgun marker
+  // in the name keeps a bullet; otherwise a rifle-only design name, or a bullet longer than 3.2 calibers, is rifle-only.
+  var PISTOL_B = /xtp|\bhap\b|jhp|\bswc\b|\bwc\b|wadcutter|\bhst\b|gold ?dot|gdhp|\btmj\b|cowboy|\blrn\b|\bxpb\b|fmj-?rn|\bjfp\b|critical (duty|defense)|xtreme (defense|penetrator)|\bhog\b|\bsd\b/i;
+  var RIFLE_B = /spitzer|spire|\bsbt\b|eld|a-?max|v-?max|vld|hybrid|ballistic (tip|silvertip)|\bnbt\b|accubond|\bsst\b|scirocco|\btmk\b|match ?king|\bsmk\b|game ?king|\bttsx\b|\blrx\b|hpbt|bthp|scenar|pro-?hunter|\bph\b|partition|core-?lokt|power-?point|grand slam|a-frame|inter(lock|bond)|\bgmx\b|\becx\b|\bcx\b|hot-?cor|tipped|sub-?sonic|vlr|rangemaster|\bdg[sx]\b|vrg-\d/i;
+  function rifleBullet(p) { return !PISTOL_B.test(p.name) && (RIFLE_B.test(p.name) || (p.dia > 0 && p.len / p.dia > 3.2)); }
   function projList() {
     var all_ = all('projectiles').slice().sort(function (a, b) {          // user bullets (★) first, then by name
       return (b.name.charAt(0) === '★') - (a.name.charAt(0) === '★') || a.name.localeCompare(b.name, undefined, { numeric: true });
     }), g = S.groove, f = $('projDia') ? $('projDia').value || 'match' : 'match';
+    var pistol = S.calPistol != null ? S.calPistol : (S.caselen < 35 && S.oal < 45);
+    if (pistol) all_ = all_.filter(function (p) { return p.name.charAt(0) === '★' || !rifleBullet(p); });   // own bullets always shown
     if (f === 'all') return all_;
     if (f === 'match') return g ? all_.filter(function (p) { return Math.abs(p.dia - g) < 0.2; }) : all_;
     return all_.filter(function (p) { return diaKey(p.dia) === +f; });
@@ -103,7 +110,8 @@
   function applyCaliber(c) {
     S.caliberName = c.name; S.caselen = c.caselen; S.oal = c.oal || S.oal; S.casevol = c.casevol || c.casevolGrH2O * E.GRH2O_CM3;
     S.groove = c.groove; S.aeff = c.aeff || 0; S.pmax = c.pmax; S.sebert = c.sebert || 0.5; S.ps = c.ps || S.ps || 250;
-    S.barrel = c.barrel || (c.caselen < 35 && c.oal < 45 ? 127 : 610);
+    S.calPistol = c.pistol != null ? !!c.pistol : (c.caselen < 35 && c.oal < 45);   // handgun caliber (published flag, else size)
+    S.barrel = c.barrel || (S.calPistol ? 127 : 610);
     S.gap = c.revolver ? (c.gap || 0.15) : 0; S.cyl = c.cyl || Math.round(((S.oal || 0) + 1) * 100) / 100;
   }
   // Revolver: barrel is measured from the cylinder face; gas leaks through the cylinder gap.

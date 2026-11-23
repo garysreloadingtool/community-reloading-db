@@ -19,7 +19,7 @@ Results are estimates only, so never use them as load data.
   meaningless numbers.
 - **Fitted powders** (154, marked "(fitted)") have burn parameters fitted to roughly 100,000 published manufacturer load
   points. On held-out loads (cartridges and bullets not used in the fit) the median muzzle-velocity error is about 2.4 %
-  for rifle (90 % within about 6 %) and about 5.3 % for pistol (90 % within about 13 %). 104 of them meet the quality bar
+  for rifle (90 % within about 6 %) and about 5.4 % for pistol (90 % within about 12 %). 104 of them meet the quality bar
   (median error at most 5 %, 9 in 10 loads within 15 %); the others say how far off they typically are in their name,
   e.g. "(fitted, ~7% typical error)", and "few test loads" when fewer than 20 held-out loads could check them. Each fitted
   powder shares one burn-shape template, so pressure is only a rough estimate (median error about 15 % for rifle, 25–35 %
@@ -29,14 +29,16 @@ Results are estimates only, so never use them as load data.
   standards for cartridges that appear in the manuals. Their case capacity is not published by either standard, so it is
   estimated: from the C.I.P. case profile, by fitting it to the cartridge's published loads, or for straight-walled cases
   from bore area and case length (each method was checked against cartridges with known capacity: about 3–4 % median
-  error). Low-pressure straight-walled rifle cartridges (45-70, 444 Marlin, 450 Marlin, 458 SOCOM, 38-55, 375 Winchester)
-  and some old military rounds read about 10–14 % fast; measure your own case capacity and calibrate with a chronograph.
+  error). Each manual's printed overall length is used for its own loads; without one, the SAAMI or C.I.P. maximum.
+- **Straight-walled rifle cartridges** (45-70, 444 Marlin, 450 Marlin/Bushmaster, 458 SOCOM/Win Mag/Lott, 38-55, 375 Win)
+  read about 2 % fast on average (45-70 about 7 %); their flat- and round-nose bullets are sized by the handgun rules.
 - **Revolvers:** revolver cartridges default to a 0.15 mm (0.006") cylinder gap; gas escaping through the gap is modelled
   as choked flow, and the barrel length is measured from the cylinder face. Set the gap to 0 for a single-shot or test barrel. Measure your own case capacity for best results.
-- **Bullets:** besides the original bullet files, about 1,500 bullets named in manufacturer manuals and load data
+- **Bullets:** besides the original bullet files, about 1,650 bullets named in manufacturer manuals and load data
   (maker, type, weight, diameter; Hornady G1 BC and item number where printed) are listed. Most manuals don't print
   bullet length, so for those it is estimated from weight, diameter and nose shape (typically within about 4 %); measure
-  your own bullets for best results. Filter the bullet list by diameter with the Ø selector.
+  your own bullets for best results. Filter the bullet list by diameter with the Ø selector; with a handgun caliber
+  selected, rifle-only bullets (spitzers, match and big-game rifle designs) are hidden.
 - Only the fitted parameters are included here, not the published load data they were fitted to.
 - For any powder, use **Calibrate**: enter your measured charge/velocity pairs and the powder's Ba is scaled to fit.
   `<Measurement>` blocks in `.grtload` files are imported and saved with the load.
