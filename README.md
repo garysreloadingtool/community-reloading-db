@@ -17,9 +17,9 @@ Results are estimates only, so never use them as load data.
 - The engine integrates burn, gas pressure and bullet motion with an adaptive second-order step, includes heat loss to
   the chamber and bore walls (`K.hw`), and refuses loads whose charge cannot fit in the case instead of showing
   meaningless numbers.
-- **Fitted powders** (marked "(fitted)", 99 rifle and 4 pistol powders) have burn parameters fitted to roughly 100,000 published
+- **Fitted powders** (marked "(fitted)", 100 rifle and 7 pistol powders) have burn parameters fitted to roughly 100,000 published
   manufacturer load points. On held-out loads (cartridges and bullets not used in the fit) the median muzzle-velocity
-  error is about 2.5 % for rifle (90 % within about 6 %) and about 6 % for pistol (90 % within about 13.5 %). Each fitted powder shares one burn-shape template, so pressure
+  error is about 2.5 % for rifle (90 % within about 6 %) and about 6 % for pistol (90 % within about 13 %). Each fitted powder shares one burn-shape template, so pressure
   is only a rough estimate (median error about 15 % for rifle, 25–35 % for pistol). **Never exceed published maximum loads.**
 - **Typical cartridges** (marked "(typical)", 47 rifle and 17 pistol cartridges) use typical case capacities and the SAAMI (or CIP) maximum overall
   length where no load data gives one; real brass varies by about 2 %.
