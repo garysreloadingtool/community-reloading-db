@@ -14,6 +14,7 @@
   .row { grid-template-columns: 1fr 92px 44px; font-size: 14px; padding: 2px 0; }
   .row input { padding: 5px 6px; font-size: 16px; }
   select { padding: 8px 6px; font-size: 15px; }
+  .chk select.mini { font-size: 15px; max-width: none; flex: 1; padding: 6px; }
   .kv { font-size: 15px; padding: 5px 0; }
   #summary { font-size: 13px; }
   #chartp, #vivp { flex: 1; min-height: 0; }

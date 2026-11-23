@@ -25,6 +25,10 @@ Results are estimates only, so never use them as load data.
   length where no load data gives one; real brass varies by about 2 %.
 - **Revolvers:** revolver cartridges default to a 0.15 mm (0.006") cylinder gap; gas escaping through the gap is modelled
   as choked flow, and the barrel length is measured from the cylinder face. Set the gap to 0 for a single-shot or test barrel. Measure your own case capacity for best results.
+- **Bullets:** besides the original bullet files, about 1,500 bullets named in manufacturer manuals and load data
+  (maker, type, weight, diameter; Hornady G1 BC and item number where printed) are listed. Most manuals don't print
+  bullet length, so for those it is estimated from weight, diameter and nose shape (typically within about 4 %); measure
+  your own bullets for best results. Filter the bullet list by diameter with the Ø selector.
 - Only the fitted parameters are included here, not the published load data they were fitted to.
 - For any powder, use **Calibrate**: enter your measured charge/velocity pairs and the powder's Ba is scaled to fit.
   `<Measurement>` blocks in `.grtload` files are imported and saved with the load.

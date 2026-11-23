@@ -23,7 +23,7 @@
       <button data-tab="s-pow" data-group="sub">Powder</button>
     </div>
     <div class="panel pane" id="s-cal" data-pane="sub"><select id="selCaliber"></select><div id="f-caliber"></div></div>
-    <div class="panel pane" id="s-bul" data-pane="sub" hidden><label class="chk"><input type="checkbox" id="projFilter" checked> only bullets matching the groove diameter</label><select id="selProjectile"></select><div id="f-projectile"></div></div>
+    <div class="panel pane" id="s-bul" data-pane="sub" hidden><label class="chk">Bullet diameter <select id="projDia" class="mini" title="Filter the bullet list by diameter"></select></label><select id="selProjectile"></select><div id="f-projectile"></div></div>
     <div class="panel pane small" id="s-pow" data-pane="sub" hidden><select id="selPowder"></select><div id="f-powder"></div></div>
   </section>
 
@@ -130,6 +130,7 @@
 <script src="config.js"></script>
 <script src="data.js"></script>
 <script src="fitted.js"></script>
+<script src="bullets.js"></script>
 <script src="engine.js"></script>
 <script src="app.js"></script>
 <script src="calib.js"></script>

@@ -53,9 +53,27 @@
     var o = document.createElement('option'); o.value = ''; o.textContent = placeholder; sel.appendChild(o);
     list.forEach(function (it, i) { var op = document.createElement('option'); op.value = i; op.textContent = it.name; sel.appendChild(op); });
   }
+  // Bullet list filter: bullets matching the caliber's groove (default), all, or one bullet diameter.
+  function diaKey(mm) { return Math.round(mm / 25.4 * 1000); }          // diameter in thousandths of an inch
   function projList() {
-    var all_ = all('projectiles'), g = S.groove, only = $('projFilter') && $('projFilter').checked;
-    return only && g ? all_.filter(function (p) { return Math.abs(p.dia - g) < 0.2; }) : all_;
+    var all_ = all('projectiles').slice().sort(function (a, b) {          // user bullets (★) first, then by name
+      return (b.name.charAt(0) === '★') - (a.name.charAt(0) === '★') || a.name.localeCompare(b.name, undefined, { numeric: true });
+    }), g = S.groove, f = $('projDia') ? $('projDia').value || 'match' : 'match';
+    if (f === 'all') return all_;
+    if (f === 'match') return g ? all_.filter(function (p) { return Math.abs(p.dia - g) < 0.2; }) : all_;
+    return all_.filter(function (p) { return diaKey(p.dia) === +f; });
+  }
+  function fillDia() {
+    var sel = $('projDia'); if (!sel) return;
+    var cur = sel.value || store.get('projDia') || 'match', n = {};
+    all('projectiles').forEach(function (p) { if (p.dia > 0) { var k = diaKey(p.dia); n[k] = (n[k] || 0) + 1; } });
+    var opts = [['match', 'Match caliber' + (S.groove ? ' (.' + String(diaKey(S.groove)).padStart(3, '0') + '″)' : '')], ['all', 'All diameters']]
+      .concat(Object.keys(n).sort(function (a, b) { return a - b; }).map(function (k) {
+        return [k, '.' + String(k).padStart(3, '0') + '″ · ' + (k * 0.0254).toFixed(2) + ' mm (' + n[k] + ')'];
+      }));
+    sel.innerHTML = GRTHTML('');
+    opts.forEach(function (o) { var op = document.createElement('option'); op.value = o[0]; op.textContent = o[1]; sel.appendChild(op); });
+    sel.value = opts.some(function (o) { return o[0] === cur; }) ? cur : 'match';
   }
 
   // ---------- build inputs ----------
@@ -312,6 +330,7 @@
   // ---------- selects ----------
   var lists = {};
   function populate() {
+    fillDia();
     lists.loads = DB.loads.concat(comm.loads); lists.calibers = all('calibers'); lists.powders = all('powders'); lists.projectiles = projList();
     fillSelect($('selLoad'), lists.loads, 'Example loads (' + lists.loads.length + ')…');
     fillSelect($('selCaliber'), lists.calibers, 'Caliber (' + lists.calibers.length + ')…');
@@ -351,7 +370,7 @@
     $('selCaliber').onchange = function (e) { if (e.target.value !== '') { applyCaliber(lists.calibers[e.target.value]); S.title = ''; populate(); compute(); } };
     $('selProjectile').onchange = function (e) { if (e.target.value !== '') { applyProjectile(lists.projectiles[e.target.value]); S.title = ''; syncSelects(); compute(); } };
     $('selPowder').onchange = function (e) { if (e.target.value !== '') { applyPowder(lists.powders[e.target.value]); S.title = ''; syncSelects(); compute(); } };
-    if ($('projFilter')) $('projFilter').onchange = populate;
+    if ($('projDia')) $('projDia').onchange = function (e) { store.set('projDia', e.target.value); populate(); };
     $('btnUnits').onclick = function () { imperial = !imperial; store.set('imperial', imperial); $('btnUnits').textContent = imperial ? 'Imperial' : 'Metric'; buildFields(); render(); };
     $('btnUnits').textContent = imperial ? 'Imperial' : 'Metric';
     $('btnSave').onclick = exportLoad;
