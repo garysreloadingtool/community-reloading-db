@@ -1,0 +1,3 @@
+# Community calibrations need an approving review from a maintainer before their pull request can be merged
+# (enforced by the "Maintainer approval for calibrations" ruleset on main).
+/community/calibrations.json @garysreloadingtool

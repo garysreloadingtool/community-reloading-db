@@ -19,4 +19,4 @@ How submissions work:
 Setup: create the `calibration` and `component` labels and allow Actions to create pull requests
 (Settings → Actions → General → Workflow permissions).
 
-Serial numbers and locations are stripped in the app before sharing, and the validator drops them too.
+The app does not collect serial numbers; locations are stripped before sharing, and the validator drops both fields if present.

@@ -29,7 +29,7 @@ Results are estimates only, so never use them as load data.
 
 ## Calibration library
 **Calibrate** opens a library of the user's own chronograph data. Each record stores:
-- **Firearm and components:** firearm make and model, serial/ID, barrel length, twist, powder lot, primer, brass and chronograph.
+- **Firearm and components:** firearm make and model, barrel length, twist, powder lot, primer, brass and chronograph.
 - **Conditions:** date, location/altitude, powder and air temperature, measured case volume and OAL, and notes.
 - **Load and shots:** a snapshot of the caliber, bullet and powder model, plus every shot as `charge: v1 v2 v3 …`.
 - **Result:** the fitted powder factor. Avg, SD and ES are shown for each charge.
@@ -44,7 +44,7 @@ Fitting uses the record's own barrel length, temperature and measurements, not w
 - **Reading:** a static JSON file in a GitHub repository, fetched when online and cached for offline use. There is no server.
 - **Submitting:** a pre-filled GitHub issue. `.github/workflows/calibration-submission.yml` validates it with
   `tools/validate_community.js` and opens a PR for a maintainer to review.
-- **Privacy:** serial number and location are never shared, and notes only when the user ticks "include notes".
+- **Privacy:** location is never shared, and notes only when the user ticks "include notes".
 - **Shared calibers, bullets, powders and loads:** **Share** on the main screen (More tab on mobile) sends the current item the same way, via `tools/validate_items.js`, into `community/items.json`. Merged items appear in the dropdowns marked ☁ and are cached for offline use.
 - **Setup:** push this project to a GitHub repository, then set the URLs in `web/config.js` (see `community/README.md`).
 

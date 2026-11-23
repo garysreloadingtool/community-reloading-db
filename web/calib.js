@@ -5,10 +5,12 @@
   'use strict';
   var A = window.GRTApp, $ = A.$, KEY = 'calibrations', FORMAT = 'GarysReloadingTool-calibrations';
   var recs = A.store.get(KEY) || [], cur = null;
+  // Serial numbers are no longer recorded; drop any saved by older versions.
+  if (recs.some(function (r) { return 'serial' in r; })) { recs.forEach(function (r) { delete r.serial; }); A.store.set(KEY, recs); }
 
   // Text fields: [id, label, placeholder]. Numeric fields: [id, label, unit kind].
   var TEXT = [['name', 'Record name', 'e.g. Tikka T3x 6.5CM – N540 lot 12'], ['make', 'Firearm make', 'Tikka'], ['model', 'Firearm model', 'T3x Varmint'],
-    ['serial', 'Serial / ID', 'optional'], ['powderLot', 'Powder lot', ''], ['primer', 'Primer', 'CCI BR-2'], ['brass', 'Brass', 'Lapua, 3× fired'],
+    ['powderLot', 'Powder lot', ''], ['primer', 'Primer', 'CCI BR-2'], ['brass', 'Brass', 'Lapua, 3× fired'],
     ['chrono', 'Chronograph', 'Garmin Xero C1'], ['date', 'Date', ''], ['location', 'Location / altitude', '']];
   var NUM = [['barrel', 'Barrel length', 'len'], ['twist', 'Twist (1 in …)', 'len'], ['T', 'Powder temp.', 'temp'], ['ambient', 'Air temp.', 'temp'],
     ['casevol', 'Measured case vol.', 'vol'], ['oal', 'Measured OAL', 'len']];
@@ -25,7 +27,7 @@
   // A fresh record seeded from the load currently on screen.
   function fromCurrent() {
     var S = A.state();
-    return { id: uid(), name: '', make: '', model: '', serial: '', powderLot: '', primer: '', brass: '', chrono: '', date: today(), location: '', notes: '',
+    return { id: uid(), name: '', make: '', model: '', powderLot: '', primer: '', brass: '', chrono: '', date: today(), location: '', notes: '',
       barrel: S.barrel, twist: S.twist || 254, T: S.T == null ? 21 : S.T, ambient: S.T == null ? 21 : S.T, casevol: S.casevol, oal: S.oal,
       load: snapshot(S), shots: (S.measured || []).map(function (m) { return { mc: m.mc, v: [m.v] }; }), baCal: 1 };
   }
@@ -136,6 +138,7 @@
         var n = 0;
         arr.forEach(function (r) {
           if (!r || !r.load || !Array.isArray(r.shots)) return;
+          delete r.serial;
           var i = recs.findIndex(function (x) { return x.id === r.id; });
           if (i >= 0) recs[i] = r; else recs.push(r); n++;
         });

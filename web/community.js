@@ -8,7 +8,7 @@
   var all = [], page = 0, status = '';
   var configured = function () { return CFG.communityIndexUrl && !/OWNER\/REPO/.test(CFG.communityIndexUrl); };
 
-  // Only these fields ever leave the user's browser. Serial number and location are never shared.
+  // Only these fields ever leave the user's browser. Location is never shared (serial numbers are not collected).
   var SHARE_FIELDS = ['make', 'model', 'barrel', 'twist', 'powderLot', 'primer', 'brass', 'chrono', 'T', 'ambient', 'casevol', 'oal', 'baCal'];
   var LOAD_FIELDS = ['caliberName', 'caselen', 'groove', 'aeff', 'pmax', 'ps', 'sebert', 'projName', 'mp', 'blen', 'friction', 'powderName',
     'Ba', 'a0', 'z1', 'z2', 'Qex', 'k', 'pc', 'pcd', 'eta', 'tcc', 'tch'];
@@ -77,7 +77,7 @@
   function byId(id) { return all.find(function (r) { return r.id === id; }); }
   function toLocal(r) {
     var o = JSON.parse(JSON.stringify(r));
-    o.id = C().uid(); o.name = '⇩ ' + (r.name || 'Community calibration'); o.date = o.date || r.sharedAt || ''; o.serial = ''; o.location = '';
+    o.id = C().uid(); o.name = '⇩ ' + (r.name || 'Community calibration'); o.date = o.date || r.sharedAt || ''; delete o.serial; o.location = '';
     o.notes = (r.notes || '') + (r.submittedBy ? '\nShared by ' + r.submittedBy : ''); return o;
   }
 
