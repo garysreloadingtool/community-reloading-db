@@ -46,3 +46,5 @@
   .panel.fixed { flex: 0 0 auto; }
   #vivp { flex: 0 0 32%; }
   #t-more > .panel { overflow-y: auto; overscroll-behavior: contain; }
+
+  .lfilt { margin-bottom: 6px; } .lfilt select.mini { flex: 1; min-width: 0; font-size: 15px; padding: 6px; } .lfilt input[type=search] { font-size: 15px; padding: 6px 8px; }

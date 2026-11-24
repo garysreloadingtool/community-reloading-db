@@ -70,6 +70,32 @@
     if (f === 'match') return g ? all_.filter(function (p) { return Math.abs(p.dia - g) < 0.2; }) : all_;
     return all_.filter(function (p) { return diaKey(p.dia) === +f; });
   }
+  // Example load list filter: rifle/pistol, then caliber, then free-text search (name, caliber, bullet, powder).
+  function loadPistol(L) {
+    var c = L.caliber || {}, k = all('calibers').find(function (x) { return x.name === c.name; });
+    return k && k.pistol != null ? !!k.pistol : (c.caselen < 35 && c.oal < 45);
+  }
+  function loadList() {
+    var t = $('loadType') ? $('loadType').value : '', cal = $('loadCal') ? $('loadCal').value : '';
+    var q = $('loadSearch') ? $('loadSearch').value.trim().toLowerCase().split(/\s+/).filter(Boolean) : [];
+    var byType = DB.loads.concat(comm.loads).filter(function (L) { return !t || (t === 'pistol') === loadPistol(L); });
+    var sel = $('loadCal');
+    if (sel) {                                                           // caliber choices for the chosen type, with counts
+      var n = {}; byType.forEach(function (L) { var c = (L.caliber || {}).name || '?'; n[c] = (n[c] || 0) + 1; });
+      var names = Object.keys(n).sort(function (a, b) { return a.localeCompare(b, undefined, { numeric: true }); });
+      if (cal && !n[cal]) cal = '';
+      sel.innerHTML = GRTHTML('');
+      [['', 'All calibers (' + names.length + ')']].concat(names.map(function (c) { return [c, c + ' (' + n[c] + ')']; })).forEach(function (o) {
+        var op = document.createElement('option'); op.value = o[0]; op.textContent = o[1]; sel.appendChild(op);
+      });
+      sel.value = cal;
+    }
+    return byType.filter(function (L) {
+      if (cal && ((L.caliber || {}).name || '?') !== cal) return false;
+      var hay = [L.name, (L.caliber || {}).name, (L.projectile || {}).name, (L.powder || {}).name, L.src].join(' ').toLowerCase();
+      return q.every(function (w) { return hay.indexOf(w) >= 0; });
+    });
+  }
   function fillDia() {
     var sel = $('projDia'); if (!sel) return;
     var cur = sel.value || store.get('projDia') || 'match', n = {};
@@ -339,8 +365,9 @@
   var lists = {};
   function populate() {
     fillDia();
-    lists.loads = DB.loads.concat(comm.loads); lists.calibers = all('calibers'); lists.powders = all('powders'); lists.projectiles = projList();
-    fillSelect($('selLoad'), lists.loads, 'Example loads (' + lists.loads.length + ')…');
+    lists.loads = loadList(); lists.calibers = all('calibers'); lists.powders = all('powders'); lists.projectiles = projList();
+    var nAll = DB.loads.length + comm.loads.length;
+    fillSelect($('selLoad'), lists.loads, 'Example loads (' + (lists.loads.length < nAll ? lists.loads.length + ' of ' + nAll : nAll) + ')…');
     fillSelect($('selCaliber'), lists.calibers, 'Caliber (' + lists.calibers.length + ')…');
     fillSelect($('selProjectile'), lists.projectiles, 'Bullet (' + lists.projectiles.length + ')…');
     fillSelect($('selPowder'), lists.powders, 'Powder (' + lists.powders.length + ')…');
@@ -373,11 +400,15 @@
     var saved = store.get('state');
     if (saved && saved.casevol) S = saved; else applyLoad(DB.loads[1] || DB.loads[0]);
     if (S.laddercnt == null) S.laddercnt = 1;
+    if ($('loadType')) $('loadType').value = store.get('loadType') || '';
+    if ($('loadCal')) { var lc = store.get('loadCal') || ''; var op = document.createElement('option'); op.value = lc; $('loadCal').appendChild(op); $('loadCal').value = lc; }
     populate();
     $('selLoad').onchange = function (e) { if (e.target.value !== '' && e.target.value !== 'cur') { applyLoad(lists.loads[e.target.value]); populate(); compute(); } };
     $('selCaliber').onchange = function (e) { if (e.target.value !== '') { applyCaliber(lists.calibers[e.target.value]); S.title = ''; populate(); compute(); } };
     $('selProjectile').onchange = function (e) { if (e.target.value !== '') { applyProjectile(lists.projectiles[e.target.value]); S.title = ''; syncSelects(); compute(); } };
     $('selPowder').onchange = function (e) { if (e.target.value !== '') { applyPowder(lists.powders[e.target.value]); S.title = ''; syncSelects(); compute(); } };
+    ['loadType', 'loadCal'].forEach(function (id) { if ($(id)) $(id).onchange = function (e) { store.set(id, e.target.value); populate(); }; });
+    if ($('loadSearch')) $('loadSearch').oninput = function () { populate(); };
     if ($('projDia')) $('projDia').onchange = function (e) { store.set('projDia', e.target.value); populate(); };
     $('btnUnits').onclick = function () { imperial = !imperial; store.set('imperial', imperial); $('btnUnits').textContent = imperial ? 'Imperial' : 'Metric'; buildFields(); render(); };
     $('btnUnits').textContent = imperial ? 'Imperial' : 'Metric';

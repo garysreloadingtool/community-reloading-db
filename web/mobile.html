@@ -40,7 +40,7 @@
 
   <section class="pane" id="t-more" data-pane="main" hidden>
     <div class="panel">
-      <h2>Example loads</h2><select id="selLoad"></select>
+      <h2>Example loads</h2><div class="mfilter lfilt"><select id="loadType" class="mini" aria-label="Rifle or pistol loads" title="Show rifle or pistol loads"><option value="">Rifle &amp; pistol</option><option value="rifle">Rifle</option><option value="pistol">Pistol</option></select><select id="loadCal" class="mini" aria-label="Caliber of example loads" title="Show loads for one caliber"></select></div><div class="mfilter lfilt"><input id="loadSearch" type="search" placeholder="Search loads…" aria-label="Search example loads"></div><select id="selLoad"></select>
       <h2 class="mt10">Files</h2>
       <div class="tools"><button id="btnOpen">Open file…</button><button id="btnSave">Save load</button></div>
       <button id="btnShare">Share load, caliber, bullet or powder</button>
@@ -49,7 +49,7 @@
       <h2 class="mt10">Powder model</h2>
       <button id="btnAdv">Show powder model parameters</button>
       <p class="disclaimer mtauto">Estimates from a simplified model. Not load data. Always verify against published manufacturer data.</p>
-      <div class="muted"><a href="mailto:webmaster@garysreloadingtool.com?subject=I%20found%20an%20issue%20on%20the%20website." class="muted">Issues?</a> · <a href="mailto:webmaster@garysreloadingtool.com?subject=I%20have%20a%20suggestion." class="muted">Suggestions?</a> · <a href="https://github.com/garysreloadingtool/community-reloading-db" class="muted">Contribute</a> · <a href="index.html?desktop=1" class="muted">Desktop version</a></div>
+      <div class="muted"><a href="mailto:webmaster@garysreloadingtool.com?subject=I%20found%20an%20issue%20on%20the%20website." class="muted">Issues?</a> · <a href="mailto:webmaster@garysreloadingtool.com?subject=I%20have%20a%20suggestion." class="muted">Suggestions?</a> · <a href="https://github.com/garysreloadingtool/garysreloadingtool" class="muted">Contribute</a> · <a href="index.html?desktop=1" class="muted">Desktop version</a></div>
     </div>
     <input id="file" type="file" multiple accept=".grtload,.caliber,.projectile,.propellant,.xml" hidden>
   </section>

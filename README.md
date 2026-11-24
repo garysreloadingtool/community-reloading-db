@@ -39,6 +39,7 @@ Results are estimates only, so never use them as load data.
   bullet length, so for those it is estimated from weight, diameter and nose shape (typically within about 4 %); measure
   your own bullets for best results. Filter the bullet list by diameter with the Ø selector; with a handgun caliber
   selected, rifle-only bullets (spitzers, match and big-game rifle designs) are hidden.
+- **Example loads:** filter the list by rifle or pistol, then by caliber, or search it by name, caliber, bullet or powder.
 - Only the fitted parameters are included here, not the published load data they were fitted to.
 - For any powder, use **Calibrate**: enter your measured charge/velocity pairs and the powder's Ba is scaled to fit.
   `<Measurement>` blocks in `.grtload` files are imported and saved with the load.
