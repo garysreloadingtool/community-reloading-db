@@ -8,7 +8,7 @@
 
   // Model constants. KBA and KHEAT are fitted to measured chronograph data (see tools/fit_model.js).
   // hw: wall heat-transfer coefficient (W per m² of wall at flame temperature), fitted in validation.
-  var K = { ba: 0.748, hw: 1.5e7, prog: 1, cd: 0.8, step: 1 };   // hw: fitted to ~10,000 published pressures; cd: revolver cylinder-gap discharge coefficient, fitted to revolver loads
+  var K = { ba: 0.748, hw: 1.5e7, prog: 1, cd: 0.8, step: 1, P0: 2500, pexp: 0.85, pwarn: 0.91 };   // pwarn: rifle over-pressure warning fires at this fraction of MAP (keeps the old model's max-load flag rate; the pexp engine reads ~9% low at peak rifle pressure, pistol reads true so no correction). hw: fitted to ~10,000 published pressures; cd: revolver cylinder-gap discharge coefficient, fitted to revolver loads; pexp: pressure exponent of the burn-rate law (sub-linear Vieille r∝p^n, n≈0.8–0.9 for nitrocellulose), validated on published data; P0: reference pressure (bar) anchoring Ba's scale
 
   // Three-phase form function phi(z), phi(0)=1 so that Ba is the start of the vivacity curve:
   // phase 1 (0..z1) linear with slope a0, phase 2 (z1..z2) linear transition, phase 3 (z2..1) degressive burnout.
@@ -76,7 +76,7 @@
     function deriv(z, x, v, Q, out, Ml, Wl) {
       var p = gasP(z, x, v, Q, Ml, Wl);
       var gen = F * mc * z, Trel = gen > 0 ? Math.max(0, (gen - (k - 1) * (0.5 * meff * v * v + Q) - (Wl || 0)) / gen) : 0;
-      out[0] = z < 1 ? Ba * phi(z, pw) * (p / 1e5) : 0;
+      out[0] = z < 1 ? Ba * phi(z, pw) * K.P0 * Math.pow(p / 1e5 / K.P0, K.pexp) : 0;   // burn rate ∝ p^pexp (Vieille); the P0 pivot keeps Ba on the same scale as the old linear law
       out[1] = v;
       out[2] = moving ? A * Math.max(0, p / (1 + mc / (3 * meff)) - pfric) / meff : 0;
       out[3] = K.hw * (Awall0 + Pbore * x) * Trel / (k - 1);
@@ -118,7 +118,7 @@
       heatLoss: Q, gapLoss: mc > 0 ? Ml / mc : 0, pmax: pmax / 1e5, pmuzzle: pm / 1e5, v: v, E: E, t: t, z: z, travel: travel,
       xpmax: xpmax, tpmax: tpmax, burnoutX: burnout, seat: seat, freeVol: V0 * 1e6,
       fill: powderVol / inp.casevol * 100, eff: E / (mc * pw.Qex * 1e3) * 100,
-      ipsc: (inp.mp / GR) * (v * 3.28084) / 1000, curve: out, overPmax: inp.pmax ? pmax / 1e5 > inp.pmax : false
+      ipsc: (inp.mp / GR) * (v * 3.28084) / 1000, curve: out, overPmax: inp.pmax ? pmax / 1e5 > inp.pmax * (inp.pistol ? 1 : K.pwarn) : false
     };
   }
 

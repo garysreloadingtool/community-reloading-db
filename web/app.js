@@ -165,7 +165,7 @@
     for (var i = 0; i < n; i++) {
       var mc = S.mc - i * (n > 1 ? S.laddermc : 0); if (mc <= 0) break;
       var r = E.simulate({ casevol: S.casevol, groove: S.groove, aeff: S.aeff, oal: S.oal, caselen: S.caselen, barrel: S.barrel,
-        ps: S.ps, sebert: S.sebert, mp: S.mp, blen: S.blen, friction: S.friction, mc: mc, T: S.T, powder: powderObj(), pmax: S.pmax, revolver: revolverObj() });
+        ps: S.ps, sebert: S.sebert, mp: S.mp, blen: S.blen, friction: S.friction, mc: mc, T: S.T, powder: powderObj(), pmax: S.pmax, pistol: S.calPistol, revolver: revolverObj() });
       r.mc = mc; results.push(r);
     }
     if (focus >= results.length) focus = 0;
@@ -184,7 +184,7 @@
       '<div>' + esc(S.powderName || 'Custom powder') + ' · ' + fmt(toDisp(r.mc, 'mass'), 'mass') + ' ' + unitLabel('mass') + '</div>' +
       '<div class="muted">Seating depth ' + fmt(toDisp(r.seat, 'len'), 'len') + ' ' + unitLabel('len') + ' · free volume ' + fmt(toDisp(r.freeVol, 'vol'), 'vol') + ' ' + unitLabel('vol') + '</div>' +
       (S.powderFit ? '<div class="muted">Fitted powder: velocity typically within ±' + (S.powderFit.velErrMedian * 100).toFixed(1) +
-        ' % of published data' + (S.powderFit.velErr90 ? ', 9 in 10 loads within ±' + (S.powderFit.velErr90 * 100).toFixed(0) + ' %' : '') + '; pressure is a rough estimate (±25 %). Never exceed published maximum loads.</div>' : '') +
+        ' % of published data' + (S.powderFit.velErr90 ? ', 9 in 10 loads within ±' + (S.powderFit.velErr90 * 100).toFixed(0) + ' %' : '') + '; pressure is a rough estimate (±20 %). Never exceed published maximum loads.</div>' : '') +
       (S.baCal && S.baCal !== 1 ? '<div class="muted">Chrono-calibrated' + (S.calName ? ' (' + esc(S.calName) + ')' : '') + ': Ba ×' + S.baCal.toFixed(3) + '</div>' : ''));
     var kv = [
       ['Max. pressure', fmt(toDisp(r.pmax, 'pres'), 'pres') + ' ' + unitLabel('pres'), r.overPmax ? 'bad' : 'p'],
@@ -200,7 +200,7 @@
     var res = $('results');
     if (res) res.innerHTML = GRTHTML(kv.map(function (k) { return '<div class="kv ' + k[2] + '"><span>' + k[0] + '</span><b>' + k[1] + '</b></div>'; }).join('') +
       (r.invalid ? '<div class="warn">⚠ ' + esc(r.invalid) + '</div>' : '') +
-      (r.overPmax ? '<div class="warn">⚠ Exceeds the caliber\'s maximum pressure</div>' : ''));
+      (r.overPmax ? '<div class="warn">⚠ ' + (r.pmax > S.pmax ? 'Exceeds' : 'Near') + ' the caliber\'s maximum pressure</div>' : ''));
     var lad = $('ladder');
     if (lad) lad.innerHTML = GRTHTML(results.length < 2 ? '<span class="muted">Ladder off (steps = 1)</span>' :
       results.map(function (q, i) {

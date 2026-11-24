@@ -18,11 +18,11 @@ Results are estimates only, so never use them as load data.
   the chamber and bore walls (`K.hw`), and refuses loads whose charge cannot fit in the case instead of showing
   meaningless numbers.
 - **Fitted powders** (154, marked "(fitted)") have burn parameters fitted to roughly 100,000 published manufacturer load
-  points. On held-out loads (cartridges and bullets not used in the fit) the median muzzle-velocity error is about 2.4 %
-  for rifle (90 % within about 6 %) and about 5.4 % for pistol (90 % within about 12 %). 104 of them meet the quality bar
+  points. On held-out loads (cartridges and bullets not used in the fit) the median muzzle-velocity error is about 2.2 %
+  for rifle (90 % within about 6 %) and about 5.3 % for pistol (90 % within about 12 %). 104 of them meet the quality bar
   (median error at most 5 %, 9 in 10 loads within 15 %); the others say how far off they typically are in their name,
   e.g. "(fitted, ~7% typical error)", and "few test loads" when fewer than 20 held-out loads could check them. Each fitted
-  powder shares one burn-shape template, so pressure is only a rough estimate (median error about 15 % for rifle, 25–35 %
+  powder shares one burn-shape template, so pressure is only a rough estimate (median error about 12 % for rifle and about 17 %
   for pistol). **Never exceed published maximum loads.**
 - **Typical cartridges** (205, marked "(typical)") use typical case capacities and the SAAMI (or C.I.P.) maximum overall
   length where no load data gives one; real brass varies by about 2 %. 141 of them were added from the SAAMI and C.I.P.
