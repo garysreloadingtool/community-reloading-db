@@ -36,8 +36,10 @@
   var clean = function (s) { return String(s || '').replace(/^[★☁⇩]\s*/, '').replace(/ \(by [^)]*\)$/, '').replace(/ \(from load\)$/, '').trim(); };
   var r4 = function (v) { return v == null || v === '' || isNaN(v) ? undefined : +(+v).toPrecision(6); };
   function caliber(S) {
+    var rev = S.gap > 0;
     return { name: clean(S.caliberName), caselen: r4(S.caselen), oal: r4(S.oal), casevol: r4(S.casevol), groove: r4(S.groove), aeff: r4(S.aeff),
-      pmax: r4(S.pmax), sebert: r4(S.sebert), ps: r4(S.ps), barrel: r4(S.barrel) };
+      pmax: r4(S.pmax), sebert: r4(S.sebert), ps: r4(S.ps), barrel: r4(S.barrel),
+      revolver: rev ? 1 : undefined, gap: rev ? r4(S.gap) : undefined, cyl: rev ? r4(S.cyl) : undefined };
   }
   function projectile(S) { return { name: clean(S.projName), mass: r4(S.mp), len: r4(S.blen), dia: r4(S.groove), friction: r4(S.friction) }; }
   function powder(S) {

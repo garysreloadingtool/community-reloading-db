@@ -319,7 +319,8 @@
     var xml = '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>\n<GarysReloadingTool version="web-1.0">\n  <InnerBallistikInput>\n' +
       '    <title>' + enc(S.title || ((S.caliberName || '') + ' ' + (S.projName || '') + ' ' + (S.powderName || ''))) + '</title>\n    <caliber>\n' +
       I('CaliberName', S.caliberName) + I('oal', S.oal, 'mm') + I('caselen', S.caselen, 'mm') + I('casevol', S.casevol, 'cm3') + I('Dz', S.groove, 'mm') +
-      I('Aeff', S.aeff, 'mm2') + I('pMaxZul', S.pmax, 'bar') + I('sebert', S.sebert) + I('ps', S.ps, 'bar') + '    </caliber>\n    <gun>\n' + I('xe', S.barrel, 'mm') +
+      I('Aeff', S.aeff, 'mm2') + I('pMaxZul', S.pmax, 'bar') + I('sebert', S.sebert) + I('ps', S.ps, 'bar') +
+      (S.gap > 0 ? I('revolver', 1) + I('gap', S.gap, 'mm') + I('cyl', S.cyl, 'mm') : '') + '    </caliber>\n    <gun>\n' + I('xe', S.barrel, 'mm') +
       '    </gun>\n    <projectile>\n' + I('ProjectileName', S.projName) + I('mp', S.mp, 'g') + I('glen', S.blen, 'mm') + I('gfriction', S.friction, 'bar') +
       '    </projectile>\n    <propellant>\n' + I('pname', S.powderName) +
       ['Ba','Qex','k','a0','z1','z2','eta','pc','pcd','tcc','tch'].map(function (k) { return I(k, S[k]); }).join('') +
@@ -347,7 +348,7 @@
         if (vs.length && m > 0) meas.push({ mc: m, v: vs.reduce(function (a, b) { return a + b; }, 0) / vs.length, n: vs.length });
       });
       applyLoad({ name: t ? decodeURIComponent(t.textContent) : fname,
-        caliber: { name: c.CaliberName, oal: nf(c, 'oal'), caselen: nf(c, 'caselen'), casevol: nf(c, 'casevol'), groove: nf(c, 'Dz'), aeff: nf(c, 'Aeff'), pmax: nf(c, 'pMaxZul'), sebert: nf(c, 'sebert', 0.5), ps: nf(c, 'ps', 250) },
+        caliber: { name: c.CaliberName, oal: nf(c, 'oal'), caselen: nf(c, 'caselen'), casevol: nf(c, 'casevol'), groove: nf(c, 'Dz'), aeff: nf(c, 'Aeff'), pmax: nf(c, 'pMaxZul'), sebert: nf(c, 'sebert', 0.5), ps: nf(c, 'ps', 250), revolver: nf(c, 'revolver'), gap: nf(c, 'gap'), cyl: nf(c, 'cyl') },
         gun: { barrel: nf(g, 'xe', 610) }, measured: meas, projectile: { name: p.ProjectileName, mass: nf(p, 'mp'), len: nf(p, 'glen'), friction: nf(p, 'gfriction') },
         powder: { name: ((w.mname || '') + ' ' + (w.pname || '')).trim(), Ba: nf(w, 'Ba'), Qex: nf(w, 'Qex'), k: nf(w, 'k'), a0: nf(w, 'a0'), z1: nf(w, 'z1'), z2: nf(w, 'z2'),
           eta: nf(w, 'eta', 1), pc: nf(w, 'pc'), pcd: nf(w, 'pcd'), tcc: nf(w, 'tcc'), tch: nf(w, 'tch'), mc: nf(w, 'mc'), pt: nf(w, 'pt', 21), laddercnt: nf(w, 'laddercnt', 1), laddermc: nf(w, 'laddermc') } });

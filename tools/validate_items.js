@@ -21,12 +21,16 @@ const num = (v, lo, hi, name, req) => {
 const obj = (v, name) => (v && typeof v === 'object' && !Array.isArray(v) ? v : fail(name + ' is missing'));
 const name = (v, what) => str(v, 120) || fail(what + ' name is required');
 
-const caliber = (c) => ({
-  name: name(c.name, 'caliber'), caselen: num(c.caselen, 5, 150, 'case length (mm)', true), oal: num(c.oal, 10, 200, 'OAL (mm)'),
-  casevol: num(c.casevol, 0.1, 60, 'case volume (cm³)', true), groove: num(c.groove, 2, 30, 'groove diameter (mm)', true),
-  aeff: num(c.aeff, 0, 700, 'bore area (mm²)'), pmax: num(c.pmax, 100, 8000, 'max. pressure (bar)', true),
-  sebert: num(c.sebert, 0, 2, 'Sebert factor'), ps: num(c.ps, 0, 2000, 'shot-start pressure (bar)'), barrel: num(c.barrel, 40, 1600, 'barrel (mm)')
-});
+const caliber = (c) => {
+  const revolver = c.revolver ? true : undefined;                       // handgun fired through a cylinder gap
+  return {
+    name: name(c.name, 'caliber'), caselen: num(c.caselen, 5, 150, 'case length (mm)', true), oal: num(c.oal, 10, 200, 'OAL (mm)'),
+    casevol: num(c.casevol, 0.1, 60, 'case volume (cm³)', true), groove: num(c.groove, 2, 30, 'groove diameter (mm)', true),
+    aeff: num(c.aeff, 0, 700, 'bore area (mm²)'), pmax: num(c.pmax, 100, 8000, 'max. pressure (bar)', true),
+    sebert: num(c.sebert, 0, 2, 'Sebert factor'), ps: num(c.ps, 0, 2000, 'shot-start pressure (bar)'), barrel: num(c.barrel, 40, 1600, 'barrel (mm)'),
+    revolver: revolver, gap: revolver ? num(c.gap, 0.01, 2, 'cylinder gap (mm)') : undefined, cyl: revolver ? num(c.cyl, 10, 120, 'cylinder length (mm)') : undefined
+  };
+};
 const projectile = (p) => ({
   name: name(p.name, 'bullet'), mass: num(p.mass, 0.1, 200, 'bullet mass (g)', true), len: num(p.len, 1, 120, 'bullet length (mm)', true),
   dia: num(p.dia, 2, 30, 'bullet diameter (mm)'), friction: num(p.friction, 0, 2000, 'extra bore friction (bar)')
