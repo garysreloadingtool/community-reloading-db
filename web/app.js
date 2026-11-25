@@ -142,6 +142,15 @@
     '458 Win Magnum (typical)': 0.954, '350 Legend (typical)': 1.065, '375 Winchester (typical)': 0.972,
     '38-55 Winchester (typical)': 0.944
   };
+  // Per-cartridge muzzle-velocity calibration for pistol/revolver cartridges (SWCAL above is straight-wall rifle only).
+  // Same held-out gate as PCAL (validation/pvcal.js: train/test, direction-agreement, test-error). .38 Special is NOT
+  // here — its velocity bias is barrel/level-dependent and a scalar worsened held-out error. Re-run after a data rebuild.
+  var PVCAL = {
+    '380 Auto (typical)': 0.965, '9mm Luger (typical)': 1.059, '357 SIG (typical)': 1.067,
+    '32 S&W Long (typical)': 0.974, '327 Federal Magnum (typical)': 1.035, '357 Rem Maximum (typical)': 0.964,
+    '10mm Auto (typical)': 1.05, '45 Colt (typical)': 0.968, '45 Win Magnum (typical)': 1.077,
+    '460 S&W Magnum (typical)': 1.023, '480 Ruger (typical)': 1.052
+  };
   // Per-cartridge peak-pressure calibration. The shared model carries a per-cartridge pressure bias (mostly from the
   // approximate "typical" case capacity); this corrects it, but ONLY where one factor validates on a held-out split
   // (validation/pcal.js: train/test with direction-agreement and test-error gates). Other cartridges stay at 1 and keep
@@ -157,7 +166,7 @@
     S.calPistol = c.pistol != null ? !!c.pistol : (c.caselen < 35 && c.oal < 45);   // handgun caliber (published flag, else size)
     S.barrel = c.barrel || (S.calPistol ? 127 : 610);
     S.gap = c.revolver ? (c.gap || 0.15) : 0; S.cyl = c.cyl || Math.round(((S.oal || 0) + 1) * 100) / 100;
-    S.calVcal = c.vcal || SWCAL[c.name] || 1;
+    S.calVcal = c.vcal || SWCAL[c.name] || PVCAL[c.name] || 1;
     S.calPcal = c.pcal || PCAL[c.name] || 1;
   }
   // Revolver: barrel is measured from the cylinder face; gas leaks through the cylinder gap.
