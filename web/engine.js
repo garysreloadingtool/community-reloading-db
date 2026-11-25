@@ -8,7 +8,7 @@
 
   // Model constants. KBA and KHEAT are fitted to measured chronograph data (see tools/fit_model.js).
   // hw: wall heat-transfer coefficient (W per m² of wall at flame temperature), fitted in validation.
-  var K = { ba: 0.748, hw: 1.5e7, prog: 1, cd: 0.8, step: 1, P0: 2500, pexp: 0.85, pwarn: 0.91 };   // pwarn: rifle over-pressure warning fires at this fraction of MAP (keeps the old model's max-load flag rate; the pexp engine reads ~9% low at peak rifle pressure, pistol reads true so no correction). hw: fitted to ~10,000 published pressures; cd: revolver cylinder-gap discharge coefficient, fitted to revolver loads; pexp: pressure exponent of the burn-rate law (sub-linear Vieille r∝p^n, n≈0.8–0.9 for nitrocellulose), validated on published data; P0: reference pressure (bar) anchoring Ba's scale
+  var K = { ba: 0.748, hw: 1.5e7, prog: 1, cd: 0.8, step: 1, P0: 2500, pexp: 0.85, pwarn: 0.91 };   // pwarn: rifle over-pressure warning fires at this fraction of MAP (a conservative margin below MAP; per-cartridge peak-pressure bias, where it validates on held-out data, is corrected by inp.pcal (validation/pcal.js)). hw: fitted to ~10,000 published pressures; cd: revolver cylinder-gap discharge coefficient, fitted to revolver loads; pexp: pressure exponent of the burn-rate law (sub-linear Vieille r∝p^n, n≈0.8–0.9 for nitrocellulose), validated on published data; P0: reference pressure (bar) anchoring Ba's scale
 
   // Three-phase form function phi(z), phi(0)=1 so that Ba is the start of the vivacity curve:
   // phase 1 (0..z1) linear with slope a0, phase 2 (z1..z2) linear transition, phase 3 (z2..1) degressive burnout.
@@ -28,7 +28,7 @@
   }
 
   /* inp: { casevol cm3, groove mm, aeff mm2 (optional), oal mm, caselen mm, barrel mm,
-   *        ps bar, sebert, mp g, blen mm, friction bar, mc g, T °C, powder{...}, vcal (optional muzzle-velocity factor),
+   *        ps bar, sebert, mp g, blen mm, friction bar, mc g, T °C, powder{...}, vcal (optional muzzle-velocity factor), pcal (optional peak-pressure factor),
    *        revolver: { gap mm, cyl mm } (optional; barrel is then measured from the cylinder face) } */
   function simulate(inp) {
     var pw = inp.powder;
@@ -112,8 +112,10 @@
       fill: mc / (pw.pcd || 900) * 1e6 / inp.casevol * 100, eff: NaN, ipsc: NaN, curve: [], overPmax: false };
     var pm = gasP(z, x, v, Q, Ml, Wl);
     out.push([x, pm, v, t, z]);
-    var vcal = inp.vcal > 0 ? inp.vcal : 1;                      // per-cartridge muzzle-velocity calibration (straight-wall); pressure is left as modelled
+    var vcal = inp.vcal > 0 ? inp.vcal : 1;                      // per-cartridge muzzle-velocity calibration (straight-wall)
     if (vcal !== 1) { v *= vcal; for (var ci = 0; ci < out.length; ci++) out[ci][2] *= vcal; }
+    var pcal = inp.pcal > 0 ? inp.pcal : 1;                      // per-cartridge peak-pressure calibration (validation/pcal.js); velocity and energy unaffected
+    if (pcal !== 1) { pmax *= pcal; pm *= pcal; for (var pj = 0; pj < out.length; pj++) out[pj][1] *= pcal; }
     var E = 0.5 * mp * v * v;
     var powderVol = mc / (pw.pcd || 900) * 1e6;
     return {
