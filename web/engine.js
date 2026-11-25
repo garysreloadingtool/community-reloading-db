@@ -28,7 +28,7 @@
   }
 
   /* inp: { casevol cm3, groove mm, aeff mm2 (optional), oal mm, caselen mm, barrel mm,
-   *        ps bar, sebert, mp g, blen mm, friction bar, mc g, T °C, powder{...},
+   *        ps bar, sebert, mp g, blen mm, friction bar, mc g, T °C, powder{...}, vcal (optional muzzle-velocity factor),
    *        revolver: { gap mm, cyl mm } (optional; barrel is then measured from the cylinder face) } */
   function simulate(inp) {
     var pw = inp.powder;
@@ -112,6 +112,8 @@
       fill: mc / (pw.pcd || 900) * 1e6 / inp.casevol * 100, eff: NaN, ipsc: NaN, curve: [], overPmax: false };
     var pm = gasP(z, x, v, Q, Ml, Wl);
     out.push([x, pm, v, t, z]);
+    var vcal = inp.vcal > 0 ? inp.vcal : 1;                      // per-cartridge muzzle-velocity calibration (straight-wall); pressure is left as modelled
+    if (vcal !== 1) { v *= vcal; for (var ci = 0; ci < out.length; ci++) out[ci][2] *= vcal; }
     var E = 0.5 * mp * v * v;
     var powderVol = mc / (pw.pcd || 900) * 1e6;
     return {

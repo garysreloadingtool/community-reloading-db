@@ -30,8 +30,11 @@ Results are estimates only, so never use them as load data.
   estimated: from the C.I.P. case profile, by fitting it to the cartridge's published loads, or for straight-walled cases
   from bore area and case length (each method was checked against cartridges with known capacity: about 3–4 % median
   error). Each manual's printed overall length is used for its own loads; without one, the SAAMI or C.I.P. maximum.
-- **Straight-walled rifle cartridges** (45-70, 444 Marlin, 450 Marlin/Bushmaster, 458 SOCOM/Win Mag/Lott, 38-55, 375 Win)
-  read about 2 % fast on average (45-70 about 7 %); their flat- and round-nose bullets are sized by the handgun rules.
+- **Straight-walled rifle cartridges** (45-70, 444 Marlin, 450 Marlin/Bushmaster, 458 SOCOM/Win Mag/Lott, 38-55, 375/405 Win, 350 Legend)
+  use an estimated case capacity and estimated flat/round-nose bullet lengths (sized by the handgun rules), which leaves a
+  per-cartridge muzzle-velocity bias — some read fast (45-70 about 9 %), some slow (350 Legend about 6 %). Each clearly
+  biased cartridge with enough published data is corrected by one velocity factor, fitted and checked on held-out loads,
+  cutting their median velocity error from about 6.5 % to about 4 %; cartridges within about 2 % are left uncorrected.
 - **Revolvers:** revolver cartridges default to a 0.15 mm (0.006") cylinder gap; gas escaping through the gap is modelled
   as choked flow, and the barrel length is measured from the cylinder face. Set the gap to 0 for a single-shot or test barrel. Measure your own case capacity for best results.
 - **Bullets:** besides the original bullet files, about 1,650 bullets named in manufacturer manuals and load data
